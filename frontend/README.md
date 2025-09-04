@@ -1,69 +1,83 @@
-# React + TypeScript + Vite
+# WiseCamp Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React TypeScript frontend for the WiseCamp agile project management platform.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎯 **Modern Stack**: React 19 + TypeScript + Vite
+- 🎨 **Beautiful UI**: Tailwind CSS with custom design system
+- 🔐 **Authentication**: JWT-based auth with React Context
+- 🚀 **Routing**: React Router v7 with protected routes
+- 📱 **Responsive**: Mobile-first responsive design
+- 🎭 **Icons**: Lucide React icons
+- 📝 **Forms**: React Hook Form with Zod validation
+- 🗃️ **HTTP Client**: Axios with interceptors
+- 🎯 **Drag & Drop**: React DnD for Kanban boards
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── components/          # Reusable UI components
+│   ├── auth/           # Authentication components
+│   ├── kanban/         # Kanban board components
+│   ├── layout/         # Layout components
+│   └── project/        # Project management components
+├── context/            # React contexts
+├── hooks/              # Custom React hooks
+├── pages/              # Page components
+├── services/           # API services
+├── types/              # TypeScript type definitions
+└── utils/              # Utility functions
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Node.js 18+ 
+- npm or yarn
+- Backend API running on http://localhost:8080
+
+### Installation
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+3. **Open in browser:**
+   Navigate to http://localhost:3000
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## API Integration
+
+The frontend connects to the WiseCamp Spring Boot backend API:
+
+- **Base URL**: `http://localhost:8080/api`
+- **Authentication**: JWT tokens stored in localStorage
+- **Auto-retry**: Automatic token refresh and error handling
+
+## Technology Stack
+
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **React Router** - Routing
+- **React Hook Form** - Form handling
+- **Zod** - Schema validation
+- **Axios** - HTTP client
+- **Lucide React** - Icons
+- **React DnD** - Drag and drop

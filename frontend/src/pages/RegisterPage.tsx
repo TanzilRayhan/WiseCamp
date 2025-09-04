@@ -20,8 +20,8 @@ const registerSchema = z
         "Password must contain at least one lowercase letter, one uppercase letter, and one number"
       ),
     confirmPassword: z.string(),
-    role: z.enum(["TEAM_MEMBER", "PROJECT_MANAGER"], {
-      required_error: "Please select a role",
+    role: z.enum(["TEAM_MEMBER", "PROJECT_MANAGER"] as const, {
+      message: "Please select a role",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
