@@ -57,8 +57,7 @@ export interface ProjectResponse {
   id: number;
   name: string;
   description: string;
-  owner: UserResponse;
-  members: UserResponse[];
+  ownerId: number;
 }
 
 // Board types

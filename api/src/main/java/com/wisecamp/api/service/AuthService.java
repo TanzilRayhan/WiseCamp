@@ -20,7 +20,8 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, UserDetailsService userDetailsService, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager, UserDetailsService userDetailsService, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -33,6 +34,7 @@ public class AuthService {
             throw new IllegalStateException("Email already in use");
         }
         User user = new User();
+        user.setName(request.name());
         user.setUsername(request.username());
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
@@ -42,10 +44,17 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
-        );
+                new UsernamePasswordAuthenticationToken(request.email(), request.password()));
         final UserDetails userDetails = userDetailsService.loadUserByUsername(request.email());
         final String token = jwtUtil.generateToken(userDetails);
-        return new AuthResponse(token);
+        User user = userRepository.findByEmail(request.email()).orElseThrow();
+        UserResponse userResp = new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRole(),
+                user.getAvatarUrl());
+        return new AuthResponse(token, userResp);
     }
 }

@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-  Plus,
-  FolderKanban,
-  Users,
-  Calendar,
-  Activity,
-  Clock,
-  CheckCircle2,
-} from "lucide-react";
-import type { BoardSummaryResponse, ProjectResponse } from "../types";
+import { Plus, FolderKanban, Users, Calendar, Activity } from "lucide-react";
+import type { ProjectResponse } from "../types";
 import { apiService } from "../services/api";
 import { handleApiError } from "../utils/errorHandler";
 
 const DashboardPage: React.FC = () => {
-  const [boards, setBoards] = useState<BoardSummaryResponse[]>([]);
   const [projects, setProjects] = useState<ProjectResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -25,13 +16,8 @@ const DashboardPage: React.FC = () => {
         setLoading(true);
         setError("");
 
-        const [boardsData, projectsData] = await Promise.all([
-          apiService.getBoards(),
-          apiService.getProjects(),
-        ]);
-
-        setBoards(boardsData.slice(0, 6)); // Show only first 6 boards
-        setProjects(projectsData.slice(0, 6)); // Show only first 6 projects
+        const projectsData = await apiService.getProjects();
+        setProjects(projectsData.slice(0, 6));
       } catch (err) {
         setError(handleApiError(err));
       } finally {
@@ -50,27 +36,7 @@ const DashboardPage: React.FC = () => {
       color: "text-blue-600",
       bgColor: "bg-blue-100",
     },
-    {
-      name: "Active Boards",
-      value: boards.length,
-      icon: Activity,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
-    {
-      name: "Team Members",
-      value: projects.reduce((acc, project) => acc + project.members.length, 0),
-      icon: Users,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
-    },
-    {
-      name: "Total Cards",
-      value: boards.reduce((acc, board) => acc + board.cardCount, 0),
-      icon: CheckCircle2,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
-    },
+    // Additional stats can be re-enabled when corresponding endpoints exist
   ];
 
   if (loading) {
@@ -182,12 +148,8 @@ const DashboardPage: React.FC = () => {
                       </p>
                       <div className="flex items-center mt-2 space-x-4">
                         <div className="flex items-center text-xs text-gray-500">
-                          <Users className="w-3 h-3 mr-1" />
-                          {project.members.length} members
-                        </div>
-                        <div className="flex items-center text-xs text-gray-500">
                           <Calendar className="w-3 h-3 mr-1" />
-                          Owner: {project.owner.name}
+                          Owner ID: {project.ownerId}
                         </div>
                       </div>
                     </div>
@@ -198,75 +160,7 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Recent Boards */}
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Recent Boards
-            </h2>
-            <Link
-              to="/boards"
-              className="text-sm font-medium text-primary-600 hover:text-primary-700"
-            >
-              View all
-            </Link>
-          </div>
-
-          <div className="divide-y divide-gray-200">
-            {boards.length === 0 ? (
-              <div className="p-6 text-center">
-                <Activity className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">
-                  No boards
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Create your first Kanban board to start organizing tasks.
-                </p>
-                <div className="mt-6">
-                  <Link
-                    to="/boards"
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Board
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              boards.map((board) => (
-                <div key={board.id} className="p-6 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <Link
-                        to={`/board/${board.id}`}
-                        className="text-sm font-medium text-gray-900 hover:text-primary-600"
-                      >
-                        {board.name}
-                      </Link>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {board.description}
-                      </p>
-                      <div className="flex items-center mt-2 space-x-4">
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Users className="w-3 h-3 mr-1" />
-                          {board.memberCount} members
-                        </div>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          {board.cardCount} cards
-                        </div>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Clock className="w-3 h-3 mr-1" />
-                          {new Date(board.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        {/* Boards section can be added when backend endpoints are ready */}
       </div>
 
       {/* Quick Actions */}
