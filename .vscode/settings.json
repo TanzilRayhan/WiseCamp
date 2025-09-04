@@ -1,0 +1,12 @@
+{
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-24",
+      "path": "c:\\Users\\Tanzil Rayhan\\AppData\\Local\\oracleJdk-24",
+      "default": true
+    }
+  ],
+  "java.jdt.ls.java.home": "c:\\Users\\Tanzil Rayhan\\AppData\\Local\\oracleJdk-24",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.updateBuildConfiguration": "interactive"
+}
