@@ -1,6 +1,7 @@
 package com.wisecamp.api.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Dtos {
@@ -18,14 +19,15 @@ public class Dtos {
     public record UserSummary(Long id, String name, String avatarUrl) {
     }
 
-    public record UserResponse(Long id, String name, String email) {
+    public record UserResponse(Long id, String name, String email, String username, String role, String avatarUrl) {
     }
 
     // --- Cards ---
     public record CardSummary(Long id, String name, LocalDate dueDate) {
     }
 
-    public record CardResponse(Long id, String title, String description, Integer position, LocalDate dueDate) {
+    public record CardResponse(Long id, String title, String name, String description, Integer position,
+            Boolean isActive, LocalDate dueDate, int commentCount, int attachmentCount) {
     }
 
     // --- Columns ---
@@ -33,10 +35,11 @@ public class Dtos {
     }
 
     // --- Boards ---
-    public record BoardSummaryResponse(Long id, String name, String description) {
+    public record BoardSummaryResponse(Long id, String name, String description, Boolean isPublic, Long userId,
+            String userName, int memberCount, int cardCount, LocalDateTime createdAt) {
     }
 
-    public record BoardRequest(String name, String description, Boolean isPublic) {
+    public record BoardRequest(String name, String description, Boolean isPublic, Long projectId) {
     }
 
     public record FullBoardResponse(Long id, String name, String description, List<UserResponse> members,

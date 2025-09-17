@@ -35,16 +35,12 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // Allow H2 console
                                                                                                   // frames
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll() // Allow H2 console
-                        .requestMatchers("/actuator/**").permitAll() // Allow actuator endpoints
-                        .requestMatchers("/").permitAll() // Allow root
-                        .requestMatchers("/health").permitAll() // Allow health endpoint
-                        .requestMatchers("/error").permitAll() // Allow error page
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll()) // TEMPORARY: Allow all requests without authentication
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        // TEMPORARY: Comment out JWT filter for development
+        // http.addFilterBefore(jwtRequestFilter,
+        // UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

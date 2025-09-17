@@ -19,13 +19,47 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<ProjectResponse>> getProjects() {
+        return ResponseEntity.ok(projectService.getUserProjects());
+    }
+
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(@RequestBody CreateProjectRequest request) {
         return ResponseEntity.ok(projectService.createProject(request));
     }
 
-    @GetMapping
-    public ResponseEntity<List<ProjectResponse>> getProjects() {
-        return ResponseEntity.ok(projectService.getUserProjects());
+    @GetMapping("/{projectId}")
+    public ResponseEntity<ProjectDetailResponse> getProjectById(@PathVariable Long projectId) {
+        return ResponseEntity.ok(projectService.getProjectById(projectId));
+    }
+
+    @PutMapping("/{projectId}")
+    public ResponseEntity<ProjectResponse> updateProject(
+            @PathVariable Long projectId,
+            @RequestBody UpdateProjectRequest request) {
+        return ResponseEntity.ok(projectService.updateProject(projectId, request));
+    }
+
+    @DeleteMapping("/{projectId}")
+    public ResponseEntity<Void> deleteProject(@PathVariable Long projectId) {
+        projectService.deleteProject(projectId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{projectId}/members")
+    public ResponseEntity<Void> addProjectMember(
+            @PathVariable Long projectId,
+            @RequestBody AddMemberRequest request) {
+        projectService.addMember(projectId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{projectId}/members/{userId}")
+    public ResponseEntity<Void> removeProjectMember(
+            @PathVariable Long projectId,
+            @PathVariable Long userId) {
+        projectService.removeMember(projectId, userId);
+        return ResponseEntity.noContent().build();
     }
 }

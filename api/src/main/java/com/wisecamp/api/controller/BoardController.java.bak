@@ -1,0 +1,46 @@
+package com.wisecamp.api.controller;
+
+import com.wisecamp.api.dto.Dtos.*;
+import com.wisecamp.api.service.BoardService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/boards")
+@PreAuthorize("isAuthenticated()")
+@RequiredArgsConstructor
+public class BoardController {
+
+    private final BoardService boardService;
+
+    @GetMapping
+    public ResponseEntity<List<BoardSummaryResponse>> getUserBoards() {
+        return ResponseEntity.ok(boardService.getBoardsForCurrentUser());
+    }
+
+    @PostMapping
+    public ResponseEntity<FullBoardResponse> createBoard(@RequestBody BoardRequest request) {
+        return ResponseEntity.ok(boardService.createBoard(request));
+    }
+
+    @GetMapping("/{boardId}")
+    public ResponseEntity<FullBoardResponse> getBoardById(@PathVariable Long boardId) {
+        return ResponseEntity.ok(boardService.getBoardById(boardId));
+    }
+
+    @PutMapping("/{boardId}")
+    public ResponseEntity<FullBoardResponse> updateBoard(
+            @PathVariable Long boardId,
+            @RequestBody BoardRequest request) {
+        return ResponseEntity.ok(boardService.updateBoard(boardId, request));
+    }
+
+    @DeleteMapping("/{boardId}")
+    public ResponseEntity<Void> deleteBoard(@PathVariable Long boardId) {
+        boardService.deleteBoard(boardId);
+        return ResponseEntity.noContent().build();
+    }
+}

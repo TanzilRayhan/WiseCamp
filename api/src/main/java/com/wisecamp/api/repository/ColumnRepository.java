@@ -1,3 +1,5 @@
+// cspell:ignore wisecamp
+//noinspection SpellCheckingInspection
 package com.wisecamp.api.repository;
 
 import com.wisecamp.api.model.Column;
