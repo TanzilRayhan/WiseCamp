@@ -8,6 +8,7 @@ import {
   Calendar,
   MoreHorizontal,
 } from "lucide-react";
+import { useToast } from "../components/ui/Toast";
 import Modal from "../components/ui/Modal";
 import { apiService } from "../services/api";
 import type {
@@ -26,6 +27,7 @@ const BoardsPage: React.FC = () => {
   const [openDelete, setOpenDelete] = useState<BoardSummaryResponse | null>(
     null
   );
+  const { addToast } = useToast();
 
   const filtered = useMemo(
     () =>
@@ -50,24 +52,50 @@ const BoardsPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCreate = async (form: CreateBoardRequest) => {
-    await apiService.createBoard(form);
-    setOpenCreate(false);
-    await loadBoards();
+    try {
+      await apiService.createBoard(form);
+      addToast("Board created successfully!", "success");
+      setOpenCreate(false);
+      await loadBoards();
+    } catch (error) {
+      addToast("Failed to create board.", "error");
+      console.error("Failed to create board", error);
+    }
   };
 
   const handleUpdate = async (
     id: number,
     form: Partial<CreateBoardRequest>
   ) => {
-    await apiService.updateBoard(id, form);
-    setOpenEdit(null);
-    await loadBoards();
+    try {
+      await apiService.updateBoard(id, form);
+      addToast("Board updated successfully!", "success");
+      setOpenEdit(null);
+      await loadBoards();
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        addToast("Only the board owner can edit this board.", "error");
+      } else {
+        addToast("Failed to update board.", "error");
+      }
+      setOpenEdit(null);
+    }
   };
 
   const handleDelete = async (id: number) => {
-    await apiService.deleteBoard(id);
-    setOpenDelete(null);
-    await loadBoards();
+    try {
+      await apiService.deleteBoard(id);
+      addToast("Board deleted successfully.", "success");
+      setOpenDelete(null);
+      await loadBoards();
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        addToast("Only the board owner can delete this board.", "error");
+      } else {
+        addToast("Failed to delete board.", "error");
+      }
+      setOpenDelete(null);
+    }
   };
 
   return (

@@ -4,9 +4,10 @@ import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FolderKanban, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { FolderKanban, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { handleApiError } from "../utils/errorHandler";
+import { useToast } from "../components/ui/Toast";
 
 const registerSchema = z
   .object({
@@ -35,9 +36,9 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState<string>("");
   const { register: registerUser, state } = useAuth();
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   const {
     register,
@@ -53,7 +54,6 @@ const RegisterPage: React.FC = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      setError("");
       await registerUser({
         name: data.name,
         username: data.username,
@@ -63,7 +63,17 @@ const RegisterPage: React.FC = () => {
       });
       navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
-      setError(handleApiError(err));
+      addToast(handleApiError(err), "error");
+    }
+  };
+
+  const onInvalid = (errors: any) => {
+    // Show a toast for the first error found
+    for (const key in errors) {
+      if (errors[key].message) {
+        addToast(errors[key].message, "error");
+        break;
+      }
     }
   };
 
@@ -93,17 +103,11 @@ const RegisterPage: React.FC = () => {
           </div>
 
           <div className="grid gap-4">
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <div className="flex">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                  <div className="ml-3">
-                    <p className="text-sm text-red-700">{error}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-            <form className="grid gap-y-4" onSubmit={handleSubmit(onSubmit)}>
+            <form
+              noValidate
+              className="grid gap-y-4"
+              onSubmit={handleSubmit(onSubmit, onInvalid)}
+            >
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <label
@@ -121,11 +125,6 @@ const RegisterPage: React.FC = () => {
                     } rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm`}
                     placeholder="Max Robinson"
                   />
-                  {errors.name && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.name.message}
-                    </p>
-                  )}
                 </div>
                 <div className="grid gap-2">
                   <label
@@ -143,11 +142,6 @@ const RegisterPage: React.FC = () => {
                     } rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm`}
                     placeholder="maxrobinson"
                   />
-                  {errors.username && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.username.message}
-                    </p>
-                  )}
                 </div>
               </div>
               <div className="grid gap-2">
@@ -166,11 +160,6 @@ const RegisterPage: React.FC = () => {
                   } rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm`}
                   placeholder="m@example.com"
                 />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.email.message}
-                  </p>
-                )}
               </div>
               <div className="grid gap-2">
                 <label
@@ -189,11 +178,6 @@ const RegisterPage: React.FC = () => {
                   <option value="TEAM_MEMBER">Team Member</option>
                   <option value="PROJECT_MANAGER">Project Manager</option>
                 </select>
-                {errors.role && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.role.message}
-                  </p>
-                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -225,11 +209,6 @@ const RegisterPage: React.FC = () => {
                       )}
                     </button>
                   </div>
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.password.message}
-                    </p>
-                  )}
                 </div>
                 <div className="grid gap-2">
                   <label
@@ -264,11 +243,6 @@ const RegisterPage: React.FC = () => {
                       )}
                     </button>
                   </div>
-                  {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
                 </div>
               </div>
               <button

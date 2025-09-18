@@ -19,6 +19,7 @@ import type {
 } from "../types";
 import { apiService } from "../services/api";
 import Modal from "../components/ui/Modal";
+import { useToast } from "../components/ui/Toast";
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,8 +30,7 @@ const DashboardPage: React.FC = () => {
   const [openCreateBoard, setOpenCreateBoard] = useState(false);
   const [projectCreating, setProjectCreating] = useState(false);
   const [boardCreating, setBoardCreating] = useState(false);
-  const [projectError, setProjectError] = useState<string>("");
-  const [boardError, setBoardError] = useState<string>("");
+  const { addToast } = useToast();
   const [projectForm, setProjectForm] = useState<CreateProjectRequest>({
     name: "",
     description: "",
@@ -147,7 +147,6 @@ const DashboardPage: React.FC = () => {
             </button>
             <button
               onClick={async () => {
-                setProjectError("");
                 setProjectCreating(true);
                 try {
                   await apiService.createProject(projectForm);
@@ -155,6 +154,7 @@ const DashboardPage: React.FC = () => {
                   setProjects(p);
                   setOpenCreateProject(false);
                   setProjectForm({ name: "", description: "" });
+                  addToast("Project created successfully!", "success");
                 } catch (e: unknown) {
                   const err = e as {
                     response?: { data?: { message?: string } };
@@ -164,7 +164,7 @@ const DashboardPage: React.FC = () => {
                     err?.response?.data?.message ||
                     err?.message ||
                     "Failed to create project";
-                  setProjectError(msg);
+                  addToast(msg, "error");
                 } finally {
                   setProjectCreating(false);
                 }
@@ -203,9 +203,6 @@ const DashboardPage: React.FC = () => {
               className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          {projectError && (
-            <p className="text-sm text-red-600">{projectError}</p>
-          )}
         </div>
       </Modal>
 
@@ -225,7 +222,6 @@ const DashboardPage: React.FC = () => {
             </button>
             <button
               onClick={async () => {
-                setBoardError("");
                 setBoardCreating(true);
                 try {
                   await apiService.createBoard(boardForm);
@@ -238,6 +234,7 @@ const DashboardPage: React.FC = () => {
                     isPublic: false,
                     projectId: undefined as unknown as number | undefined,
                   });
+                  addToast("Board created successfully!", "success");
                 } catch (e: unknown) {
                   const err = e as {
                     response?: { data?: { message?: string } };
@@ -247,7 +244,7 @@ const DashboardPage: React.FC = () => {
                     err?.response?.data?.message ||
                     err?.message ||
                     "Failed to create board";
-                  setBoardError(msg);
+                  addToast(msg, "error");
                 } finally {
                   setBoardCreating(false);
                 }
@@ -321,7 +318,6 @@ const DashboardPage: React.FC = () => {
             />
             Public board
           </label>
-          {boardError && <p className="text-sm text-red-600">{boardError}</p>}
         </div>
       </Modal>
 
@@ -400,19 +396,43 @@ const DashboardPage: React.FC = () => {
                   index={index}
                   move={moveProject}
                   onEdit={async (data) => {
-                    const updated = await apiService.updateProject(
-                      project.id,
-                      data
-                    );
-                    setProjects((prev) =>
-                      prev.map((p) => (p.id === updated.id ? updated : p))
-                    );
+                    try {
+                      const updated = await apiService.updateProject(
+                        project.id,
+                        data
+                      );
+                      setProjects((prev) =>
+                        prev.map((p) => (p.id === updated.id ? updated : p))
+                      );
+                      addToast("Project updated successfully!", "success");
+                    } catch (error: any) {
+                      if (error.response?.status === 403) {
+                        addToast(
+                          "Only the project owner can edit this project.",
+                          "error"
+                        );
+                      } else {
+                        addToast("Failed to update project.", "error");
+                      }
+                    }
                   }}
                   onDelete={async () => {
-                    await apiService.deleteProject(project.id);
-                    setProjects((prev) =>
-                      prev.filter((p) => p.id !== project.id)
-                    );
+                    try {
+                      await apiService.deleteProject(project.id);
+                      setProjects((prev) =>
+                        prev.filter((p) => p.id !== project.id)
+                      );
+                      addToast("Project deleted successfully.", "success");
+                    } catch (error: any) {
+                      if (error.response?.status === 403) {
+                        addToast(
+                          "Only the project owner can delete this project.",
+                          "error"
+                        );
+                      } else {
+                        addToast("Failed to delete project.", "error");
+                      }
+                    }
                   }}
                 />
               ))}

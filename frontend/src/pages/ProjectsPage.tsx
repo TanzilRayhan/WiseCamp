@@ -15,6 +15,7 @@ import {
 import type { ProjectResponse, CreateProjectRequest } from "../types";
 import { apiService } from "../services/api";
 import Modal from "../components/ui/Modal";
+import { useToast } from "../components/ui/Toast";
 
 // Using real API; no mock data
 
@@ -27,6 +28,7 @@ export const ProjectsPage: React.FC = () => {
   const [selectedProject, setSelectedProject] =
     useState<ProjectResponse | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const { addToast } = useToast();
   const [filter, setFilter] = useState<"all" | "owned" | "member">("all");
 
   useEffect(() => {
@@ -46,9 +48,11 @@ export const ProjectsPage: React.FC = () => {
     try {
       const created = await apiService.createProject(data);
       setProjects((prev) => [...prev, created]);
+      addToast("Project created successfully!", "success");
       setShowCreateModal(false);
     } catch (error) {
       console.error("Failed to create project:", error);
+      addToast("Failed to create project.", "error");
     }
   };
 
@@ -59,10 +63,17 @@ export const ProjectsPage: React.FC = () => {
       setProjects((prev) =>
         prev.map((p) => (p.id === updated.id ? updated : p))
       );
+      addToast("Project updated successfully!", "success");
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        addToast("Only the project owner can edit this project.", "error");
+      } else {
+        addToast("Failed to update project.", "error");
+      }
+      console.error("Failed to update project:", error);
+    } finally {
       setShowEditModal(false);
       setSelectedProject(null);
-    } catch (error) {
-      console.error("Failed to update project:", error);
     }
   };
 
@@ -71,10 +82,17 @@ export const ProjectsPage: React.FC = () => {
     try {
       await apiService.deleteProject(selectedProject.id);
       setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
+      addToast("Project deleted successfully.", "success");
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        addToast("Only the project owner can delete this project.", "error");
+      } else {
+        addToast("Failed to delete project.", "error");
+      }
+      console.error("Failed to delete project:", error);
+    } finally {
       setShowDeleteModal(false);
       setSelectedProject(null);
-    } catch (error) {
-      console.error("Failed to delete project:", error);
     }
   };
 
@@ -429,7 +447,6 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
     setIsDeleting(true);
     try {
       await onConfirm();
-      onClose();
     } finally {
       setIsDeleting(false);
     }

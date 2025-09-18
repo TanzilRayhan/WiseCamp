@@ -247,14 +247,14 @@ public class BoardService {
                                                                                 ? column.getCards().stream()
                                                                                                 .map(card -> new CardResponse(
                                                                                                                 card.getId(),
-                                                                                                                card.getTitle(),
                                                                                                                 card.getName(),
+                                                                                                                card.getTitle(),
                                                                                                                 card.getDescription(),
                                                                                                                 card.getPosition(),
                                                                                                                 card.getIsActive(),
-                                                                                                                card.getDueDate() != null ? card.getDueDate().atStartOfDay() : null
-                                                                                                        ))
-                                                                                                .collect(Collectors.toList())
+                                                                                                                card.getCreatedAt()))
+                                                                                                .collect(Collectors
+                                                                                                                .toList())
                                                                                 : new ArrayList<CardResponse>()))
                                                 .collect(Collectors.toList())
                                 : new ArrayList<ColumnResponse>();
@@ -269,15 +269,24 @@ public class BoardService {
                                                 member.getAvatarUrl()))
                                 .collect(Collectors.toList());
 
+                UserResponse ownerResponse = new UserResponse(
+                                board.getOwner().getId(),
+                                board.getOwner().getName(),
+                                board.getOwner().getEmail(),
+                                board.getOwner().getUsername(),
+                                board.getOwner().getRole(),
+                                board.getOwner().getAvatarUrl());
+
                 return new FullBoardResponse(
                                 board.getId(),
                                 board.getName(),
                                 board.getDescription(),
                                 board.getIsPublic(),
                                 board.getOwner().getId(),
+                                ownerResponse,
+                                memberResponses,
                                 columnResponses,
                                 board.getCreatedAt(),
-                                board.getUpdatedAt()
-                );
+                                board.getUpdatedAt());
         }
 }

@@ -19,6 +19,7 @@ import type {
   ProjectBoardResponse,
 } from "../types";
 import Modal from "../components/ui/Modal";
+import { useToast } from "../components/ui/Toast";
 
 type Tab = "boards" | "members" | "settings";
 
@@ -28,6 +29,7 @@ export const ProjectDetailPage: React.FC = () => {
   const [project, setProject] = useState<ProjectDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("boards");
+  const { addToast } = useToast();
 
   // Modals state
   const [showEditModal, setShowEditModal] = useState(false);
@@ -54,15 +56,37 @@ export const ProjectDetailPage: React.FC = () => {
 
   const handleUpdateProject = async (data: CreateProjectRequest) => {
     if (!project) return;
-    const updated = await apiService.updateProject(project.id, data);
-    setProject((p) => (p ? { ...p, ...updated } : null));
-    setShowEditModal(false);
+    try {
+      const updated = await apiService.updateProject(project.id, data);
+      setProject((p) => (p ? { ...p, ...updated } : null));
+      setShowEditModal(false);
+      addToast("Project updated successfully!", "success");
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        addToast("Only the project owner can edit the project.", "error");
+        setShowEditModal(false);
+      } else {
+        addToast("Failed to update project.", "error");
+      }
+      console.error("Failed to update project", error);
+    }
   };
 
   const handleDeleteProject = async () => {
     if (!project) return;
-    await apiService.deleteProject(project.id);
-    navigate("/projects");
+    try {
+      await apiService.deleteProject(project.id);
+      addToast("Project deleted successfully.", "success");
+      navigate("/projects");
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        addToast("Only the project owner can delete the project.", "error");
+      } else {
+        addToast("Failed to delete project.", "error");
+      }
+      setShowDeleteModal(false);
+      console.error("Failed to delete project", error);
+    }
   };
 
   const handleAddMember = async (email: string) => {
@@ -70,6 +94,7 @@ export const ProjectDetailPage: React.FC = () => {
     await apiService.addProjectMember(project.id, email);
     await loadProject(); // Reload to get updated member list
     setShowAddMemberModal(false);
+    addToast(`Invited ${email} to the project.`, "success");
   };
 
   const handleCreateBoard = async (data: CreateBoardRequest) => {
@@ -77,6 +102,7 @@ export const ProjectDetailPage: React.FC = () => {
     await apiService.createBoard({ ...data, projectId: project.id });
     await loadProject(); // Reload to get updated board list
     setShowCreateBoardModal(false);
+    addToast("Board created successfully!", "success");
   };
 
   if (loading) {
@@ -121,22 +147,6 @@ export const ProjectDetailPage: React.FC = () => {
               Owner: <span className="font-medium">{project.ownerName}</span>
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowEditModal(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              <Edit3 className="h-4 w-4" />
-              Edit
-            </button>
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-red-200 bg-red-50 text-red-700 rounded-lg hover:bg-red-100"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </button>
-          </div>
         </div>
       </div>
 
@@ -180,7 +190,13 @@ export const ProjectDetailPage: React.FC = () => {
             onAddMember={() => setShowAddMemberModal(true)}
           />
         )}
-        {activeTab === "settings" && <SettingsTab project={project} />}
+        {activeTab === "settings" && (
+          <SettingsTab
+            project={project}
+            onEdit={() => setShowEditModal(true)}
+            onDelete={() => setShowDeleteModal(true)}
+          />
+        )}
       </div>
 
       {/* Modals */}
@@ -333,16 +349,63 @@ const MembersTab: React.FC<{
   </div>
 );
 
-const SettingsTab: React.FC<{ project: ProjectDetailResponse }> = () => (
-  <div className="max-w-2xl">
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        Project Settings
-      </h3>
-      <p className="text-gray-600">
-        This is where project settings would go. For now, you can edit or delete
-        the project using the buttons in the header.
-      </p>
+const SettingsTab: React.FC<{
+  project: ProjectDetailResponse;
+  onEdit: () => void;
+  onDelete: () => void;
+}> = ({ project, onEdit, onDelete }) => (
+  <div className="max-w-2xl space-y-8">
+    {/* General Settings */}
+    <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div className="p-6 border-b">
+        <h3 className="text-lg font-semibold text-gray-900">
+          General Settings
+        </h3>
+        <p className="text-sm text-gray-500 mt-1">
+          Update your project's name and description.
+        </p>
+      </div>
+      <div className="p-6">
+        <dl className="space-y-4">
+          <div>
+            <dt className="text-sm font-medium text-gray-600">Project Name</dt>
+            <dd className="mt-1 text-gray-900">{project.name}</dd>
+          </div>
+          <div>
+            <dt className="text-sm font-medium text-gray-600">Description</dt>
+            <dd className="mt-1 text-gray-600">
+              {project.description || "No description provided."}
+            </dd>
+          </div>
+        </dl>
+      </div>
+      <div className="p-4 bg-gray-50 border-t flex justify-end">
+        <button
+          onClick={onEdit}
+          className="px-4 py-2 rounded-lg border bg-white hover:bg-gray-50 text-sm font-medium"
+        >
+          Edit Project
+        </button>
+      </div>
+    </div>
+
+    {/* Danger Zone */}
+    <div className="bg-white border border-red-300 rounded-xl shadow-sm">
+      <div className="p-6 border-b border-red-200">
+        <h3 className="text-lg font-semibold text-red-800">Danger Zone</h3>
+        <p className="text-sm text-red-600 mt-1">
+          This action is permanent and cannot be undone.
+        </p>
+      </div>
+      <div className="p-4 bg-red-50 flex justify-between items-center">
+        <p className="text-sm font-medium text-red-800">Delete this project</p>
+        <button
+          onClick={onDelete}
+          className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm font-medium"
+        >
+          Delete Project
+        </button>
+      </div>
     </div>
   </div>
 );

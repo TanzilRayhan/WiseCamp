@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -175,11 +176,12 @@ public class ProjectService {
                 if (project.getMembers().stream().noneMatch(member -> member.getId().equals(newMember.getId()))) {
                         project.getMembers().add(newMember);
                         // Also add the new member to all boards within this project
-                        if (project.getBoards() != null) {
-                                for (Board board : project.getBoards()) {
-                                        board.getMembers().add(newMember);
-                                        boardRepository.save(board);
-                                }
+                        List<Board> boards = boardRepository.findByProjectId(projectId);
+                        for (Board board : boards) {
+                                board.getMembers().add(newMember);
+                                // No need to call save on each board, @Transactional will handle it
+                                // if the relationship is correctly configured. But being explicit is safer.
+                                boardRepository.save(board);
                         }
                         projectRepository.save(project);
                 }
@@ -206,11 +208,10 @@ public class ProjectService {
 
                 if (project.getMembers().remove(memberToRemove)) {
                         // Also remove the member from all boards within this project
-                        if (project.getBoards() != null) {
-                                for (Board board : project.getBoards()) {
-                                        board.getMembers().remove(memberToRemove);
-                                        boardRepository.save(board);
-                                }
+                        List<Board> boards = boardRepository.findByProjectId(projectId);
+                        for (Board board : boards) {
+                                board.getMembers().remove(memberToRemove);
+                                boardRepository.save(board);
                         }
                         projectRepository.save(project);
                 }

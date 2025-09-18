@@ -22,7 +22,9 @@ public class BoardDtos {
                         String name,
                         String description,
                         Boolean isPublic,
-                        Long ownerId,
+                        Long userId, // ownerId
+                        com.wisecamp.api.dto.AuthDtos.UserResponse user, // owner
+                        List<com.wisecamp.api.dto.AuthDtos.UserResponse> members,
                         List<ColumnResponse> columns,
                         LocalDateTime createdAt,
                         LocalDateTime updatedAt) {
