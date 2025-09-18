@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wisecamp.api.dto.BoardDtos.BoardRequest;
 import com.wisecamp.api.dto.BoardDtos.BoardSummaryResponse;
+import com.wisecamp.api.dto.BoardDtos.ColumnResponse;
 import com.wisecamp.api.dto.BoardDtos.FullBoardResponse;
 import com.wisecamp.api.service.BoardService;
 
@@ -61,16 +62,14 @@ public class BoardController {
     }
 
     @PostMapping("/{boardId}/columns")
-    public ResponseEntity<Void> createColumn(@PathVariable Long boardId, @RequestBody ColumnRequest req) {
-        boardService.createColumn(boardId, req.name(), req.position());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ColumnResponse> createColumn(@PathVariable Long boardId, @RequestBody ColumnRequest req) {
+        return ResponseEntity.ok(boardService.createColumn(boardId, req.name(), req.position()));
     }
 
     @PutMapping("/{boardId}/columns/{columnId}")
-    public ResponseEntity<Void> updateColumn(@PathVariable Long boardId, @PathVariable Long columnId,
+    public ResponseEntity<ColumnResponse> updateColumn(@PathVariable Long boardId, @PathVariable Long columnId,
             @RequestBody ColumnRequest req) {
-        boardService.updateColumn(boardId, columnId, req.name(), req.position());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(boardService.updateColumn(boardId, columnId, req.name(), req.position()));
     }
 
     @DeleteMapping("/{boardId}/columns/{columnId}")

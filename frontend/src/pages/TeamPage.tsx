@@ -257,7 +257,7 @@ const MemberListItem: React.FC<{
               Owner
             </span>
           ) : (
-            member.role.replace("_", " ").toLowerCase()
+            "Member"
           )}
         </div>
         <div className="relative" ref={menuRef}>

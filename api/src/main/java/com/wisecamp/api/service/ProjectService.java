@@ -91,7 +91,6 @@ public class ProjectService {
                                                 member.getName(),
                                                 member.getEmail(),
                                                 member.getUsername(),
-                                                member.getRole(),
                                                 member.getAvatarUrl(),
                                                 member.getCreatedAt() // Using createdAt as joinedAt for now
                                 ))

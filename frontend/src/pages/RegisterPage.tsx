@@ -22,9 +22,6 @@ const registerSchema = z
         "Password must contain at least one lowercase letter, one uppercase letter, and one number"
       ),
     confirmPassword: z.string(),
-    role: z.enum(["TEAM_MEMBER", "PROJECT_MANAGER"] as const, {
-      message: "Please select a role",
-    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -59,7 +56,6 @@ const RegisterPage: React.FC = () => {
         username: data.username,
         email: data.email,
         password: data.password,
-        role: data.role,
       });
       navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
@@ -160,24 +156,6 @@ const RegisterPage: React.FC = () => {
                   } rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm`}
                   placeholder="m@example.com"
                 />
-              </div>
-              <div className="grid gap-2">
-                <label
-                  htmlFor="role"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Role
-                </label>
-                <select
-                  {...register("role")}
-                  className={`w-full px-3 py-2 border ${
-                    errors.role ? "border-red-300" : "border-gray-300"
-                  } rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm`}
-                >
-                  <option value="">Select your role</option>
-                  <option value="TEAM_MEMBER">Team Member</option>
-                  <option value="PROJECT_MANAGER">Project Manager</option>
-                </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">

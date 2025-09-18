@@ -131,8 +131,8 @@ public class BoardService {
                 Board board = boardRepository.findById(boardId)
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
-                if (!board.getOwner().getId().equals(currentUser.getId())) {
-                        throw new AccessDeniedException("Only board owner can add columns");
+                if (board.getMembers().stream().noneMatch(member -> member.getId().equals(currentUser.getId()))) {
+                        throw new AccessDeniedException("Only board members can add columns");
                 }
 
                 com.wisecamp.api.model.Column col = new com.wisecamp.api.model.Column();
@@ -144,12 +144,8 @@ public class BoardService {
                 if (board.getColumns() == null)
                         board.setColumns(new java.util.ArrayList<>());
                 board.getColumns().add(col);
-                Board saved = boardRepository.save(board);
-                // find the created column
-                com.wisecamp.api.model.Column created = saved.getColumns().stream()
-                                .filter(c -> c.getName().equals(name)).reduce((a, b) -> b).orElse(null);
-                return new ColumnResponse(created.getId(), created.getName(), created.getPosition(),
-                                new java.util.ArrayList<CardResponse>());
+                boardRepository.save(board);
+                return convertToColumnResponse(col);
         }
 
         @Transactional
@@ -158,8 +154,8 @@ public class BoardService {
                 Board board = boardRepository.findById(boardId)
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
-                if (!board.getOwner().getId().equals(currentUser.getId())) {
-                        throw new AccessDeniedException("Only board owner can update columns");
+                if (board.getMembers().stream().noneMatch(member -> member.getId().equals(currentUser.getId()))) {
+                        throw new AccessDeniedException("Only board members can update columns");
                 }
 
                 com.wisecamp.api.model.Column col = board.getColumns().stream().filter(c -> c.getId().equals(columnId))
@@ -170,9 +166,7 @@ public class BoardService {
                 if (position != null)
                         col.setPosition(position.longValue());
                 boardRepository.save(board);
-                // build response
-                return new ColumnResponse(col.getId(), col.getName(), col.getPosition(),
-                                new java.util.ArrayList<CardResponse>());
+                return convertToColumnResponse(col);
         }
 
         @Transactional
@@ -181,8 +175,8 @@ public class BoardService {
                 Board board = boardRepository.findById(boardId)
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
-                if (!board.getOwner().getId().equals(currentUser.getId())) {
-                        throw new AccessDeniedException("Only board owner can delete columns");
+                if (board.getMembers().stream().noneMatch(member -> member.getId().equals(currentUser.getId()))) {
+                        throw new AccessDeniedException("Only board members can delete columns");
                 }
 
                 boolean removed = board.getColumns().removeIf(c -> c.getId().equals(columnId));
@@ -236,6 +230,25 @@ public class BoardService {
                 boardRepository.save(board);
         }
 
+        private ColumnResponse convertToColumnResponse(com.wisecamp.api.model.Column column) {
+                return new ColumnResponse(
+                                column.getId(),
+                                column.getName(),
+                                column.getPosition(),
+                                column.getCards() != null
+                                                ? column.getCards().stream()
+                                                                .map(card -> new CardResponse(
+                                                                                card.getId(),
+                                                                                card.getName(),
+                                                                                card.getTitle(),
+                                                                                card.getDescription(),
+                                                                                card.getPosition(),
+                                                                                card.getIsActive(),
+                                                                                card.getCreatedAt()))
+                                                                .collect(Collectors.toList())
+                                                : new ArrayList<>());
+        }
+
         private FullBoardResponse convertToFullBoardResponse(Board board) {
                 List<ColumnResponse> columnResponses = board.getColumns() != null
                                 ? board.getColumns().stream()
@@ -257,7 +270,7 @@ public class BoardService {
                                                                                                                 .toList())
                                                                                 : new ArrayList<CardResponse>()))
                                                 .collect(Collectors.toList())
-                                : new ArrayList<ColumnResponse>();
+                                : new ArrayList<>();
 
                 List<UserResponse> memberResponses = board.getMembers().stream()
                                 .map(member -> new UserResponse(
@@ -265,7 +278,6 @@ public class BoardService {
                                                 member.getName(),
                                                 member.getEmail(),
                                                 member.getUsername(),
-                                                member.getRole(),
                                                 member.getAvatarUrl()))
                                 .collect(Collectors.toList());
 
@@ -274,7 +286,6 @@ public class BoardService {
                                 board.getOwner().getName(),
                                 board.getOwner().getEmail(),
                                 board.getOwner().getUsername(),
-                                board.getOwner().getRole(),
                                 board.getOwner().getAvatarUrl());
 
                 return new FullBoardResponse(

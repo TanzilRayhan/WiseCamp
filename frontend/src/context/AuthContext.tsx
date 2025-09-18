@@ -25,7 +25,6 @@ interface AuthContextType {
     email: string;
     password: string;
     username: string;
-    role: "TEAM_MEMBER" | "PROJECT_MANAGER" | "SYSTEM_ADMINISTRATOR";
   }) => Promise<void>;
   logout: () => void;
 }
@@ -139,7 +138,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     email: string;
     password: string;
     username: string;
-    role: "TEAM_MEMBER" | "PROJECT_MANAGER" | "SYSTEM_ADMINISTRATOR";
   }): Promise<void> => {
     dispatch({ type: "LOGIN_START" });
 

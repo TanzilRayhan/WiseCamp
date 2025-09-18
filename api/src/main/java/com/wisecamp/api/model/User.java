@@ -20,9 +20,6 @@ public class User {
     @jakarta.persistence.Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
     @ManyToMany(mappedBy = "members")
     private Set<Board> memberOfBoards;
 
@@ -78,14 +75,6 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public Set<Board> getMemberOfBoards() {

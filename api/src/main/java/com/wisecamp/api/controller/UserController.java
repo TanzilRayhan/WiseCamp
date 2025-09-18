@@ -35,7 +35,6 @@ public class UserController {
                         user.getName(),
                         user.getEmail(),
                         user.getUsername(),
-                        user.getRole(),
                         user.getAvatarUrl()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(users);
@@ -49,7 +48,6 @@ public class UserController {
                 user.getName(),
                 user.getEmail(),
                 user.getUsername(),
-                user.getRole(),
                 user.getAvatarUrl());
         return ResponseEntity.ok(dto);
     }
@@ -70,7 +68,7 @@ public class UserController {
         // role/avatar updates intentionally omitted for safety
         userRepository.save(user);
         return ResponseEntity.ok(new UserResponse(
-                user.getId(), user.getName(), user.getEmail(), user.getUsername(), user.getRole(),
+                user.getId(), user.getName(), user.getEmail(), user.getUsername(),
                 user.getAvatarUrl()));
     }
 }

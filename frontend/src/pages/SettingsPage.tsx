@@ -175,11 +175,6 @@ const ProfileSettings: React.FC<{ user: User; onUpdate: () => void }> = ({
               <span className="text-gray-800">{user.email}</span>
             )}
           </SettingRow>
-          <SettingRow label="Role">
-            <span className="text-gray-800 capitalize">
-              {user.role.replace("_", " ").toLowerCase()}
-            </span>
-          </SettingRow>
         </div>
       </div>
       <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
