@@ -58,6 +58,34 @@ export interface ProjectResponse {
   name: string;
   description: string;
   ownerId: number;
+  ownerName: string;
+  memberCount: number;
+  boardCount: number;
+  createdAt: string;
+}
+
+export interface ProjectMemberResponse {
+  id: number;
+  name: string;
+  email: string;
+  username: string;
+  role: "TEAM_MEMBER" | "PROJECT_MANAGER" | "SYSTEM_ADMINISTRATOR";
+  avatarUrl?: string;
+  joinedAt: string;
+}
+
+export interface ProjectBoardResponse {
+  id: number;
+  name: string;
+  description: string;
+  isPublic: boolean;
+  createdAt: string;
+}
+
+export interface ProjectDetailResponse extends ProjectResponse {
+  members: ProjectMemberResponse[];
+  boards: ProjectBoardResponse[];
+  updatedAt: string;
 }
 
 // Board types

@@ -1,83 +1,61 @@
 import {
-  BrowserRouter as Router,
+  BrowserRouter,
   Routes,
   Route,
   Navigate,
+  Outlet,
 } from "react-router-dom";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/layout/Layout";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProjectsPage from "./pages/ProjectsPage";
-import BoardsPage from "./pages/BoardsPage";
+import ProjectDetailPage from "./pages/ProjectDetailPage";
 import BoardDetailPage from "./pages/BoardDetailPage";
+import BoardsPage from "./pages/BoardsPage";
 import TeamPage from "./pages/TeamPage";
 import SettingsPage from "./pages/SettingsPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import LandingPage from "./pages/LandingPage";
 import { useAuth } from "./hooks/useAuth";
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const ProtectedRoute: React.FC = () => {
   const { state } = useAuth();
+
   if (state.isLoading) {
     return (
-      <div className="min-h-screen grid place-items-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
-  if (!state.isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  return <>{children}</>;
+
+  return state.isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 function App() {
   return (
-    <DndProvider backend={HTML5Backend}>
-      <AuthProvider>
-        <Router>
-          <div className="App">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-              {/* Main Routes - No Authentication Required (Temporary) */}
-              <Route
-                path="/*"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Routes>
-                        <Route path="/dashboard" element={<DashboardPage />} />
-                        <Route path="/projects" element={<ProjectsPage />} />
-                        <Route path="/boards" element={<BoardsPage />} />
-                        <Route
-                          path="/boards/:id"
-                          element={<BoardDetailPage />}
-                        />
-                        <Route path="/team" element={<TeamPage />} />
-                        <Route path="/settings" element={<SettingsPage />} />
-                        <Route
-                          path="*"
-                          element={<Navigate to="/dashboard" replace />}
-                        />
-                      </Routes>
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </div>
-        </Router>
-      </AuthProvider>
-    </DndProvider>
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/projects/:id" element={<ProjectDetailPage />} />
+            <Route path="/boards" element={<BoardsPage />} />
+            <Route path="/boards/:id" element={<BoardDetailPage />} />
+            <Route path="/team" element={<TeamPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route index element={<Navigate to="/dashboard" replace />} />
+          </Route>
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

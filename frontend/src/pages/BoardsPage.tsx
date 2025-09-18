@@ -1,5 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Plus, Search, Users, Trash2, Edit3, Calendar } from "lucide-react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import {
+  Plus,
+  Search,
+  Users,
+  Trash2,
+  Edit3,
+  Calendar,
+  MoreHorizontal,
+} from "lucide-react";
 import Modal from "../components/ui/Modal";
 import { apiService } from "../services/api";
 import type {
@@ -64,22 +72,34 @@ const BoardsPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            className="pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Search boards..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Boards</h1>
+          <p className="text-gray-600 mt-1">
+            Organize your tasks and workflows
+          </p>
         </div>
         <button
           onClick={() => setOpenCreate(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <Plus className="h-4 w-4" /> New Board
         </button>
+      </div>
+
+      {/* Search */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search boards..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -87,51 +107,15 @@ const BoardsPage: React.FC = () => {
       ) : filtered.length === 0 ? (
         <div className="py-24 text-center text-gray-500">No boards found.</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((b) => (
-            <div
+            <BoardCard
               key={b.id}
-              onClick={() => navigate(`/boards/${b.id}`)}
-              className="p-4 border rounded-xl bg-white hover:shadow-sm transition cursor-pointer"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-sky-500 flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-900">{b.name}</div>
-                    <div className="text-xs text-gray-500">
-                      {new Date(b.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setOpenEdit(b)}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <Edit3 className="h-4 w-4 text-gray-500" />
-                  </button>
-                  <button
-                    onClick={() => setOpenDelete(b)}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </button>
-                </div>
-              </div>
-              <div className="mt-3 text-sm text-gray-600 line-clamp-2">
-                {b.description}
-              </div>
-              <div className="mt-4 text-xs text-gray-500 flex items-center gap-4">
-                <span className="inline-flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  {b.memberCount} members
-                </span>
-                <span>{b.cardCount} cards</span>
-              </div>
-            </div>
+              board={b}
+              onNavigate={() => navigate(`/boards/${b.id}`)}
+              onEdit={() => setOpenEdit(b)}
+              onDelete={() => setOpenDelete(b)}
+            />
           ))}
         </div>
       )}
@@ -190,6 +174,103 @@ const BoardsPage: React.FC = () => {
           </p>
         </Modal>
       )}
+    </div>
+  );
+};
+
+const BoardCard: React.FC<{
+  board: BoardSummaryResponse;
+  onNavigate: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}> = ({ board, onNavigate, onEdit, onDelete }) => {
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuRef]);
+
+  return (
+    <div
+      onClick={onNavigate}
+      className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer group"
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-900 truncate">
+            {board.name}
+          </h3>
+          <p className="text-sm text-gray-500">
+            Created {new Date(board.createdAt).toLocaleDateString()}
+          </p>
+        </div>
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+            className="p-1.5 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors opacity-0 group-hover:opacity-100"
+          >
+            <MoreHorizontal className="h-5 w-5" />
+          </button>
+          {showMenu && (
+            <div className="absolute right-0 mt-1 w-40 bg-white border rounded-lg shadow-lg z-10">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                  setShowMenu(false);
+                }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50"
+              >
+                <Edit3 className="h-4 w-4" /> Edit
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                  setShowMenu(false);
+                }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left text-red-600 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" /> Delete
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      <p className="text-gray-600 text-sm line-clamp-2 mb-4 h-10">
+        {board.description}
+      </p>
+      <div className="flex items-center justify-between text-sm text-gray-500">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <Users className="h-4 w-4" />
+            <span>{board.memberCount}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Calendar className="h-4 w-4" />
+            <span>{board.cardCount} cards</span>
+          </div>
+        </div>
+        <div
+          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+            board.isPublic
+              ? "bg-blue-100 text-blue-700"
+              : "bg-gray-100 text-gray-600"
+          }`}
+        >
+          {board.isPublic ? "Public" : "Private"}
+        </div>
+      </div>
     </div>
   );
 };

@@ -23,7 +23,8 @@ public class CardController {
     public ResponseEntity<CardResponse> createCard(@RequestBody CardRequest req) {
         Card c = cardService.createCard(req.columnId(), req.title(), req.name(), req.description());
         return ResponseEntity.ok(new CardResponse(c.getId(), c.getTitle(), c.getName(), c.getDescription(),
-                c.getPosition(), c.getIsActive(), c.getDueDate(), c.getComments() != null ? c.getComments().size() : 0, c.getAttachments() != null ? c.getAttachments().size() : 0));
+                c.getPosition(), c.getIsActive(), c.getDueDate(), c.getComments() != null ? c.getComments().size() : 0,
+                c.getAttachments() != null ? c.getAttachments().size() : 0));
     }
 
     @PutMapping("/{cardId}")

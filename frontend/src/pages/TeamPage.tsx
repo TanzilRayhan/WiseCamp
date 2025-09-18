@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Search, UserPlus, Trash2, Shield } from "lucide-react";
 import { apiService } from "../services/api";
-import type { User, Project, ProjectResponse } from "../types";
+import type { User, ProjectResponse, ProjectMemberResponse } from "../types";
 import Modal from "../components/ui/Modal";
 
 const TeamPage: React.FC = () => {
@@ -26,9 +26,9 @@ const TeamPage: React.FC = () => {
         // We don't have a dedicated getProjectMembers; using getProject if available
         // Fallback: getUsers (will show all) if backend doesn't return members
         try {
-          const proj = (await apiService.getProject(pid)) as unknown as Project;
+          const proj = await apiService.getProject(pid);
           if (proj?.members) {
-            setUsers(proj.members as unknown as User[]);
+            setUsers(proj.members as unknown as User[]); // Cast is okay if ProjectMemberResponse is a superset of User
           } else {
             const us = await apiService.getUsers();
             setUsers(us);
@@ -37,7 +37,7 @@ const TeamPage: React.FC = () => {
           const us = await apiService.getUsers();
           setUsers(us);
         }
-      } 
+      }
     } finally {
       setLoading(false);
     }

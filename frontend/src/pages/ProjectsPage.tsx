@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plus,
   Search,
@@ -238,6 +239,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onDelete,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
@@ -297,21 +299,26 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span>0 members</span>
+            <span>{project.memberCount} members</span>
           </div>
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4" />
-            <span>0 boards</span>
+            <span>{project.boardCount} boards</span>
           </div>
         </div>
-        <span className="text-xs">Created recently</span>
+        <span className="text-xs">
+          {new Date(project.createdAt).toLocaleDateString()}
+        </span>
       </div>
 
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-600">
-          Owner: <span className="font-medium">Project Owner</span>
+          Owner: <span className="font-medium">{project.ownerName}</span>
         </div>
-        <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+        <button
+          onClick={() => navigate(`/projects/${project.id}`)}
+          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+        >
           View Details →
         </button>
       </div>

@@ -6,6 +6,7 @@ import type {
   AuthResponse,
   CreateProjectRequest,
   ProjectResponse,
+  ProjectDetailResponse,
   CreateBoardRequest,
   Board,
   BoardSummaryResponse,
@@ -79,8 +80,8 @@ class ApiService {
     return response.data;
   }
 
-  async getProject(id: number): Promise<ProjectResponse> {
-    const response: AxiosResponse<ProjectResponse> = await this.api.get(
+  async getProject(id: number): Promise<ProjectDetailResponse> {
+    const response: AxiosResponse<ProjectDetailResponse> = await this.api.get(
       `/projects/${id}`
     );
     return response.data;

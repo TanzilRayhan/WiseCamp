@@ -331,25 +331,25 @@ const DashboardPage: React.FC = () => {
           title="Total Projects"
           value={stats.totalProjects}
           icon={<Folder className="h-6 w-6" />}
-          trend="+12%"
-          trendUp={true}
           color="blue"
         />
         <StatsCard
           title="Active Boards"
           value={stats.totalBoards}
           icon={<Calendar className="h-6 w-6" />}
-          trend="+8%"
-          trendUp={true}
           color="green"
         />
         <StatsCard
           title="Team Members"
           value={stats.totalMembers}
           icon={<Users className="h-6 w-6" />}
-          trend="+2"
-          trendUp={true}
           color="purple"
+        />
+        <StatsCard
+          title="Total Tasks"
+          value={stats.totalTasks}
+          icon={<Activity className="h-6 w-6" />}
+          color="orange"
         />
       </div>
 
@@ -420,79 +420,8 @@ const DashboardPage: React.FC = () => {
           )}
         </motion.div>
 
-        {/* Quick Actions & Activity */}
-        <motion.div
-          className="space-y-6"
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Quick Actions
-            </h3>
-            <div className="space-y-3">
-              <button
-                onClick={() => setOpenCreateProject(true)}
-                className="w-full flex items-center gap-3 p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <Plus className="h-5 w-5 text-blue-600" />
-                <span className="font-medium">Create New Project</span>
-              </button>
-              <button
-                onClick={() => setOpenCreateBoard(true)}
-                className="w-full flex items-center gap-3 p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <Calendar className="h-5 w-5 text-green-600" />
-                <span className="font-medium">Create New Board</span>
-              </button>
-              <button className="w-full flex items-center gap-3 p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                <Users className="h-5 w-5 text-purple-600" />
-                <span className="font-medium">Invite Team Members</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Recent Activity (dynamic from boards) */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Recent Activity
-            </h3>
-            <div className="space-y-4">
-              {boards
-                .slice()
-                .sort(
-                  (a, b) =>
-                    new Date(b.createdAt).getTime() -
-                    new Date(a.createdAt).getTime()
-                )
-                .slice(0, 5)
-                .map((b) => (
-                  <div key={b.id} className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Activity className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900">
-                        <span className="font-medium">{b.name}</span> board
-                        created
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(b.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              {boards.length === 0 && (
-                <div className="text-sm text-gray-500">
-                  No recent activity yet.
-                </div>
-              )}
-            </div>
-          </div>
-        </motion.div>
+        {/* Recent Activity */}
+        <RecentActivity boards={boards} />
       </div>
 
       {/* Recent Boards */}
@@ -535,19 +464,10 @@ interface StatsCardProps {
   title: string;
   value: number;
   icon: React.ReactNode;
-  trend: string;
-  trendUp: boolean;
   color: "blue" | "green" | "purple" | "orange";
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({
-  title,
-  value,
-  icon,
-  trend,
-  trendUp,
-  color,
-}) => {
+const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon, color }) => {
   const colorClasses = {
     blue: "bg-blue-50 text-blue-600",
     green: "bg-green-50 text-green-600",
@@ -555,23 +475,10 @@ const StatsCard: React.FC<StatsCardProps> = ({
     orange: "bg-orange-50 text-orange-600",
   };
 
-  const trendClasses = {
-    blue: trendUp ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50",
-    green: trendUp ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50",
-    purple: trendUp ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50",
-    orange: trendUp ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50",
-  };
-
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="flex items-center justify-between">
         <div className={`p-3 rounded-lg ${colorClasses[color]}`}>{icon}</div>
-        <div
-          className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${trendClasses[color]}`}
-        >
-          <TrendingUp className={`h-3 w-3 ${trendUp ? "" : "rotate-180"}`} />
-          {trend}
-        </div>
       </div>
       <div className="mt-4">
         <h3 className="text-2xl font-bold text-gray-900">
@@ -608,12 +515,16 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
           </p>
           <div className="flex items-center gap-4 mt-1">
             <div className="flex items-center gap-1 text-xs text-gray-500">
-              <Users className="h-3 w-3" />0 members
+              <Users className="h-3 w-3" />
+              {project.memberCount} members
             </div>
             <div className="flex items-center gap-1 text-xs text-gray-500">
-              <Calendar className="h-3 w-3" />0 boards
+              <Calendar className="h-3 w-3" />
+              {project.boardCount} boards
             </div>
-            <div className="text-xs text-gray-500">Created recently</div>
+            <div className="text-xs text-gray-500">
+              Created {new Date(project.createdAt).toLocaleDateString()}
+            </div>
           </div>
         </div>
       </div>
@@ -670,12 +581,55 @@ const BoardItem: React.FC<BoardItemProps> = ({ board }) => {
         {board.description}
       </p>
       <div className="flex items-center justify-between text-xs text-gray-500">
-        <span>0 columns</span>
+        <span>{board.cardCount} columns</span>
         <span>{new Date(board.createdAt).toLocaleDateString()}</span>
       </div>
     </div>
   );
 };
+
+const RecentActivity: React.FC<{ boards: BoardSummaryResponse[] }> = ({
+  boards,
+}) => (
+  <motion.div
+    className="bg-white rounded-xl border border-gray-200 p-6"
+    initial={{ opacity: 0, y: 8 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.4, delay: 0.1 }}
+  >
+    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      Recent Activity
+    </h3>
+    <div className="space-y-4">
+      {boards
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        .slice(0, 5)
+        .map((b) => (
+          <div key={b.id} className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <Activity className="h-4 w-4 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-gray-900">
+                <span className="font-medium">{b.name}</span> board created
+              </p>
+              <p className="text-xs text-gray-500">
+                {new Date(b.createdAt).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        ))}
+      {boards.length === 0 && (
+        <div className="text-sm text-gray-500">No recent activity yet.</div>
+      )}
+    </div>
+  </motion.div>
+);
 
 type DragTypes = "PROJECT" | "BOARD";
 
