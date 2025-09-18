@@ -37,10 +37,7 @@ const TeamPage: React.FC = () => {
           const us = await apiService.getUsers();
           setUsers(us);
         }
-      } else {
-        const us = await apiService.getUsers();
-        setUsers(us);
-      }
+      } 
     } finally {
       setLoading(false);
     }
@@ -118,14 +115,14 @@ const TeamPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <button className="px-3 py-1.5 rounded-lg border hover:bg-gray-50">
                   Message
                 </button>
                 <button className="p-2 rounded-lg hover:bg-red-50">
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </button>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>

@@ -74,7 +74,7 @@ const RegisterPage: React.FC = () => {
       >
         {/* Logo */}
         <div className="flex justify-center">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
               <FolderKanban className="w-6 h-6 " />
             </div>
