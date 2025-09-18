@@ -4,7 +4,7 @@ export interface User {
   name: string;
   email: string;
   username: string;
-  role: 'TEAM_MEMBER' | 'PROJECT_MANAGER' | 'SYSTEM_ADMINISTRATOR';
+  role: "TEAM_MEMBER" | "PROJECT_MANAGER" | "SYSTEM_ADMINISTRATOR";
   avatarUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -15,7 +15,7 @@ export interface UserResponse {
   name: string;
   email: string;
   username: string;
-  role: 'TEAM_MEMBER' | 'PROJECT_MANAGER' | 'SYSTEM_ADMINISTRATOR';
+  role: "TEAM_MEMBER" | "PROJECT_MANAGER" | "SYSTEM_ADMINISTRATOR";
   avatarUrl?: string;
 }
 
@@ -30,7 +30,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   username: string;
-  role: 'TEAM_MEMBER' | 'PROJECT_MANAGER' | 'SYSTEM_ADMINISTRATOR';
+  role: "TEAM_MEMBER" | "PROJECT_MANAGER" | "SYSTEM_ADMINISTRATOR";
 }
 
 export interface AuthResponse {
@@ -88,6 +88,7 @@ export interface CreateBoardRequest {
   name: string;
   description: string;
   isPublic: boolean;
+  projectId?: number;
 }
 
 // Column types

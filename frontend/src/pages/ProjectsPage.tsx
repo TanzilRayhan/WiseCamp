@@ -12,45 +12,10 @@ import {
   User,
 } from "lucide-react";
 import type { ProjectResponse, CreateProjectRequest } from "../types";
+import { apiService } from "../services/api";
+import Modal from "../components/ui/Modal";
 
-// Mock data for development
-const mockProjects: ProjectResponse[] = [
-  {
-    id: 1,
-    name: "WiseCamp Project Management",
-    description:
-      "A comprehensive project management tool with Kanban boards, team collaboration, and task tracking.",
-    ownerId: 1,
-  },
-  {
-    id: 2,
-    name: "E-Commerce Platform",
-    description:
-      "Building a scalable e-commerce platform with modern technologies and microservices architecture.",
-    ownerId: 1,
-  },
-  {
-    id: 3,
-    name: "Mobile App Development",
-    description:
-      "Cross-platform mobile application with React Native for iOS and Android platforms.",
-    ownerId: 1,
-  },
-  {
-    id: 4,
-    name: "Data Analytics Dashboard",
-    description:
-      "Real-time analytics dashboard for business intelligence and data visualization.",
-    ownerId: 1,
-  },
-  {
-    id: 5,
-    name: "Social Media Integration",
-    description:
-      "Social media management tool with automated posting and analytics features.",
-    ownerId: 1,
-  },
-];
+// Using real API; no mock data
 
 export const ProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<ProjectResponse[]>([]);
@@ -64,23 +29,22 @@ export const ProjectsPage: React.FC = () => {
   const [filter, setFilter] = useState<"all" | "owned" | "member">("all");
 
   useEffect(() => {
-    // Simulate loading with mock data
-    setTimeout(() => {
-      setProjects(mockProjects);
-      setLoading(false);
-    }, 800);
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await apiService.getProjects();
+        setProjects(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
   const handleCreateProject = async (data: CreateProjectRequest) => {
     try {
-      // Mock project creation
-      const newProject: ProjectResponse = {
-        id: Date.now(), // Simple ID generation
-        name: data.name,
-        description: data.description,
-        ownerId: 1,
-      };
-      setProjects((prev) => [...prev, newProject]);
+      const created = await apiService.createProject(data);
+      setProjects((prev) => [...prev, created]);
       setShowCreateModal(false);
     } catch (error) {
       console.error("Failed to create project:", error);
@@ -90,13 +54,9 @@ export const ProjectsPage: React.FC = () => {
   const handleUpdateProject = async (data: CreateProjectRequest) => {
     if (!selectedProject) return;
     try {
-      // Mock project update
+      const updated = await apiService.updateProject(selectedProject.id, data);
       setProjects((prev) =>
-        prev.map((p) =>
-          p.id === selectedProject.id
-            ? { ...p, name: data.name, description: data.description }
-            : p
-        )
+        prev.map((p) => (p.id === updated.id ? updated : p))
       );
       setShowEditModal(false);
       setSelectedProject(null);
@@ -108,7 +68,7 @@ export const ProjectsPage: React.FC = () => {
   const handleDeleteProject = async () => {
     if (!selectedProject) return;
     try {
-      // Mock project deletion
+      await apiService.deleteProject(selectedProject.id);
       setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
       setShowDeleteModal(false);
       setSelectedProject(null);
@@ -226,18 +186,18 @@ export const ProjectsPage: React.FC = () => {
       )}
 
       {/* Create Project Modal */}
-      {showCreateModal && (
-        <ProjectModal
-          title="Create New Project"
-          onSubmit={handleCreateProject}
-          onClose={() => setShowCreateModal(false)}
-        />
-      )}
+      <ProjectModal
+        title="Create New Project"
+        open={showCreateModal}
+        onSubmit={handleCreateProject}
+        onClose={() => setShowCreateModal(false)}
+      />
 
       {/* Edit Project Modal */}
-      {showEditModal && selectedProject && (
+      {selectedProject && (
         <ProjectModal
           title="Edit Project"
+          open={showEditModal}
           initialData={{
             name: selectedProject.name,
             description: selectedProject.description,
@@ -251,8 +211,9 @@ export const ProjectsPage: React.FC = () => {
       )}
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && selectedProject && (
+      {selectedProject && (
         <DeleteConfirmModal
+          open={showDeleteModal}
           projectName={selectedProject.name}
           onConfirm={handleDeleteProject}
           onClose={() => {
@@ -360,6 +321,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
 interface ProjectModalProps {
   title: string;
+  open: boolean;
   initialData?: CreateProjectRequest;
   onSubmit: (data: CreateProjectRequest) => Promise<void>;
   onClose: () => void;
@@ -367,6 +329,7 @@ interface ProjectModalProps {
 
 const ProjectModal: React.FC<ProjectModalProps> = ({
   title,
+  open,
   initialData,
   onSubmit,
   onClose,
@@ -390,68 +353,65 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Project Name *
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter project name"
-              required
-            />
-          </div>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter project description"
-            />
-          </div>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || !formData.name.trim()}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isSubmitting ? "Saving..." : "Save Project"}
-            </button>
-          </div>
-        </form>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={title}
+      size="md"
+      footer={
+        <div className="flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg border">
+            Cancel
+          </button>
+          <button
+            disabled={isSubmitting || !formData.name.trim()}
+            onClick={(e) => handleSubmit(e)}
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50"
+          >
+            {isSubmitting ? "Saving..." : "Save Project"}
+          </button>
+        </div>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Project Name *
+          </label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            rows={3}
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 
 interface DeleteConfirmModalProps {
+  open: boolean;
   projectName: string;
   onConfirm: () => Promise<void>;
   onClose: () => void;
 }
 
 const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
+  open,
   projectName,
   onConfirm,
   onClose,
@@ -462,39 +422,38 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
     setIsDeleting(true);
     try {
       await onConfirm();
+      onClose();
     } finally {
       setIsDeleting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold text-red-600 mb-4">
-          Delete Project
-        </h2>
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to delete "{projectName}"? This action cannot be
-          undone.
-        </p>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Delete Project"
+      size="sm"
+      footer={
+        <div className="flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg border">
             Cancel
           </button>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 rounded-lg bg-red-600 text-white disabled:opacity-50"
           >
             {isDeleting ? "Deleting..." : "Delete Project"}
           </button>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <p className="text-gray-600">
+        Are you sure you want to delete "{projectName}"? This action cannot be
+        undone.
+      </p>
+    </Modal>
   );
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useReducer, useEffect } from "react";
 import type { UserResponse, AuthResponse } from "../types";
 import { apiService } from "../services/api";
@@ -73,7 +74,7 @@ const initialState: AuthState = {
   user: null,
   token: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,20 +33,26 @@ const LoginPage: React.FC = () => {
     try {
       setError("");
       await login(data.email, data.password);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
       setError(handleApiError(err));
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen relative flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-50 via-white to-primary-100">
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(50%_50%_at_50%_0%,rgba(14,165,233,0.12),rgba(255,255,255,0))]" />
+      <motion.div
+        className="sm:mx-auto sm:w-full sm:max-w-md"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+      >
         {/* Logo */}
         <div className="flex justify-center">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center">
             <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <FolderKanban className="w-6 h-6 text-white" />
+              <FolderKanban className="w-6 h-6 " />
             </div>
             <span className="text-2xl font-bold text-gray-900">WiseCamp</span>
           </div>
@@ -63,10 +70,23 @@ const LoginPage: React.FC = () => {
             create a new account
           </Link>
         </p>
-      </div>
+      </motion.div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <motion.div
+        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.05 }}
+      >
+        <div className="bg-white/95 backdrop-blur border border-gray-100 py-8 px-6 shadow-lg sm:rounded-2xl sm:px-8">
+          <div className="mb-4">
+            <Link
+              to="/"
+              className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700"
+            >
+              ← Back to Home
+            </Link>
+          </div>
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
               <div className="flex">
@@ -173,7 +193,7 @@ const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || state.isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-black bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="group relative w-full flex justify-center py-2 px-4  border border-black text-sm font-medium rounded-md text-black bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isSubmitting || state.isLoading ? (
                   <div className="flex items-center">
@@ -209,7 +229,7 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
