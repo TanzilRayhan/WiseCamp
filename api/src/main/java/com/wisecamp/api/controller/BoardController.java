@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wisecamp.api.dto.Dtos.BoardRequest;
-import com.wisecamp.api.dto.Dtos.BoardSummaryResponse;
-import com.wisecamp.api.dto.Dtos.FullBoardResponse;
+import com.wisecamp.api.dto.BoardDtos.BoardRequest;
+import com.wisecamp.api.dto.BoardDtos.BoardSummaryResponse;
+import com.wisecamp.api.dto.BoardDtos.FullBoardResponse;
 import com.wisecamp.api.service.BoardService;
 
 @RestController

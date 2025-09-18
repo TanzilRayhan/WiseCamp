@@ -49,7 +49,6 @@ function App() {
             <Route path="/boards/:id" element={<BoardDetailPage />} />
             <Route path="/team" element={<TeamPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route index element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Route>
 

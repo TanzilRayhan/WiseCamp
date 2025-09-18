@@ -9,13 +9,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.wisecamp.api.dto.Dtos.BoardRequest;
-import com.wisecamp.api.dto.Dtos.BoardSummaryResponse;
-import com.wisecamp.api.dto.Dtos.CardResponse;
-import com.wisecamp.api.dto.Dtos.ColumnResponse;
-import com.wisecamp.api.dto.Dtos.FullBoardResponse;
-import com.wisecamp.api.dto.Dtos.UserResponse;
+import com.wisecamp.api.dto.AuthDtos.UserResponse;
+import com.wisecamp.api.dto.BoardDtos.BoardRequest;
+import com.wisecamp.api.dto.BoardDtos.BoardSummaryResponse;
+import com.wisecamp.api.dto.BoardDtos.CardResponse;
+import com.wisecamp.api.dto.BoardDtos.ColumnResponse;
+import com.wisecamp.api.dto.BoardDtos.FullBoardResponse;
 import com.wisecamp.api.model.Board;
 import com.wisecamp.api.model.Project;
 import com.wisecamp.api.model.User;
@@ -51,14 +52,17 @@ public class BoardService {
                                                 board.getName(),
                                                 board.getDescription(),
                                                 board.getIsPublic(),
-                                                board.getOwner().getId(),
-                                                board.getOwner().getName(),
                                                 board.getMembers().size(),
-                                                board.getColumns() != null ? board.getColumns().size() : 0,
+                                                board.getColumns() != null ? board.getColumns().stream()
+                                                                .mapToInt(c -> c.getCards() != null
+                                                                                ? c.getCards().size()
+                                                                                : 0)
+                                                                .sum() : 0,
                                                 board.getCreatedAt()))
                                 .collect(Collectors.toList());
         }
 
+        @Transactional
         public FullBoardResponse createBoard(BoardRequest request) {
                 User currentUser = getCurrentUser();
 
@@ -76,11 +80,14 @@ public class BoardService {
                                         .orElseThrow(() -> new RuntimeException("Project not found"));
 
                         // Check if user has access to the project
-                        if (!project.getMembers().contains(currentUser)) {
+                        if (project.getMembers().stream()
+                                        .noneMatch(member -> member.getId().equals(currentUser.getId()))) {
                                 throw new AccessDeniedException("Access denied to this project");
                         }
 
                         board.setProject(project);
+                        // Add all project members to the new board
+                        board.getMembers().addAll(project.getMembers());
                 }
 
                 Board savedBoard = boardRepository.save(board);
@@ -93,7 +100,7 @@ public class BoardService {
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
                 // Check access
-                if (!board.getMembers().contains(currentUser)) {
+                if (board.getMembers().stream().noneMatch(member -> member.getId().equals(currentUser.getId()))) {
                         throw new AccessDeniedException("Access denied to this board");
                 }
 
@@ -106,7 +113,7 @@ public class BoardService {
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
                 // Check if user is the owner
-                if (!board.getOwner().equals(currentUser)) {
+                if (!board.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only board owner can update the board");
                 }
 
@@ -118,12 +125,13 @@ public class BoardService {
                 return convertToFullBoardResponse(savedBoard);
         }
 
+        @Transactional
         public ColumnResponse createColumn(Long boardId, String name, Integer position) {
                 User currentUser = getCurrentUser();
                 Board board = boardRepository.findById(boardId)
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
-                if (!board.getOwner().equals(currentUser)) {
+                if (!board.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only board owner can add columns");
                 }
 
@@ -140,16 +148,17 @@ public class BoardService {
                 // find the created column
                 com.wisecamp.api.model.Column created = saved.getColumns().stream()
                                 .filter(c -> c.getName().equals(name)).reduce((a, b) -> b).orElse(null);
-                return new ColumnResponse(created.getId(), created.getName(), created.getPosition().intValue(),
-                                new java.util.ArrayList<>());
+                return new ColumnResponse(created.getId(), created.getName(), created.getPosition(),
+                                new java.util.ArrayList<CardResponse>());
         }
 
+        @Transactional
         public ColumnResponse updateColumn(Long boardId, Long columnId, String name, Integer position) {
                 User currentUser = getCurrentUser();
                 Board board = boardRepository.findById(boardId)
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
-                if (!board.getOwner().equals(currentUser)) {
+                if (!board.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only board owner can update columns");
                 }
 
@@ -160,18 +169,19 @@ public class BoardService {
                         col.setName(name);
                 if (position != null)
                         col.setPosition(position.longValue());
-                Board saved = boardRepository.save(board);
+                boardRepository.save(board);
                 // build response
-                return new ColumnResponse(col.getId(), col.getName(), col.getPosition().intValue(),
-                                new java.util.ArrayList<>());
+                return new ColumnResponse(col.getId(), col.getName(), col.getPosition(),
+                                new java.util.ArrayList<CardResponse>());
         }
 
+        @Transactional
         public void deleteColumn(Long boardId, Long columnId) {
                 User currentUser = getCurrentUser();
                 Board board = boardRepository.findById(boardId)
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
-                if (!board.getOwner().equals(currentUser)) {
+                if (!board.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only board owner can delete columns");
                 }
 
@@ -187,18 +197,19 @@ public class BoardService {
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
                 // Check if user is the owner
-                if (!board.getOwner().equals(currentUser)) {
+                if (!board.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only board owner can delete the board");
                 }
 
                 boardRepository.delete(board);
         }
 
+        @Transactional
         public void addMember(Long boardId, Long userId) {
                 User currentUser = getCurrentUser();
                 Board board = boardRepository.findById(boardId)
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
-                if (!board.getOwner().equals(currentUser)) {
+                if (!board.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only board owner can add members");
                 }
                 User user = userRepository.findById(userId)
@@ -207,11 +218,12 @@ public class BoardService {
                 boardRepository.save(board);
         }
 
+        @Transactional
         public void removeMember(Long boardId, Long userId) {
                 User currentUser = getCurrentUser();
                 Board board = boardRepository.findById(boardId)
                                 .orElseThrow(() -> new RuntimeException("Board not found"));
-                if (!board.getOwner().equals(currentUser)) {
+                if (!board.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only board owner can remove members");
                 }
                 // prevent removing owner
@@ -230,7 +242,7 @@ public class BoardService {
                                                 .map(column -> new ColumnResponse(
                                                                 column.getId(),
                                                                 column.getName(),
-                                                                column.getPosition().intValue(),
+                                                                column.getPosition(),
                                                                 column.getCards() != null
                                                                                 ? column.getCards().stream()
                                                                                                 .map(card -> new CardResponse(
@@ -240,20 +252,12 @@ public class BoardService {
                                                                                                                 card.getDescription(),
                                                                                                                 card.getPosition(),
                                                                                                                 card.getIsActive(),
-                                                                                                                card.getDueDate(),
-                                                                                                                card.getComments() != null
-                                                                                                                                ? card.getComments()
-                                                                                                                                                .size()
-                                                                                                                                : 0,
-                                                                                                                card.getAttachments() != null
-                                                                                                                                ? card.getAttachments()
-                                                                                                                                                .size()
-                                                                                                                                : 0))
-                                                                                                .collect(Collectors
-                                                                                                                .toList())
-                                                                                : new ArrayList<>()))
+                                                                                                                card.getDueDate() != null ? card.getDueDate().atStartOfDay() : null
+                                                                                                        ))
+                                                                                                .collect(Collectors.toList())
+                                                                                : new ArrayList<CardResponse>()))
                                                 .collect(Collectors.toList())
-                                : new ArrayList<>();
+                                : new ArrayList<ColumnResponse>();
 
                 List<UserResponse> memberResponses = board.getMembers().stream()
                                 .map(member -> new UserResponse(
@@ -261,7 +265,7 @@ public class BoardService {
                                                 member.getName(),
                                                 member.getEmail(),
                                                 member.getUsername(),
-                                                member.getRole().name(),
+                                                member.getRole(),
                                                 member.getAvatarUrl()))
                                 .collect(Collectors.toList());
 
@@ -269,7 +273,11 @@ public class BoardService {
                                 board.getId(),
                                 board.getName(),
                                 board.getDescription(),
-                                memberResponses,
-                                columnResponses);
+                                board.getIsPublic(),
+                                board.getOwner().getId(),
+                                columnResponses,
+                                board.getCreatedAt(),
+                                board.getUpdatedAt()
+                );
         }
 }

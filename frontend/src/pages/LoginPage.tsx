@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -29,6 +29,10 @@ const LoginPage: React.FC = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  if (state.isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError("");
@@ -40,84 +44,57 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-50 via-white to-primary-100">
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(50%_50%_at_50%_0%,rgba(14,165,233,0.12),rgba(255,255,255,0))]" />
-      <motion.div
-        className="sm:mx-auto sm:w-full sm:max-w-md"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-      >
-        {/* Logo */}
-        <div className="flex justify-center">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <FolderKanban className="w-6 h-6 " />
-            </div>
-            <span className="text-2xl font-bold text-gray-900 ">WiseCamp</span>
-          </div>
-        </div>
-
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Sign in to your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Or{" "}
-          <Link
-            to="/register"
-            className="font-medium text-primary-600 hover:text-primary-500"
-          >
-            create a new account
-          </Link>
-        </p>
-      </motion.div>
-
-      <motion.div
-        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.05 }}
-      >
-        <div className="bg-white/95 backdrop-blur border border-gray-100 py-8 px-6 shadow-lg sm:rounded-2xl sm:px-8">
-          <div className="mb-4">
+    <div className="w-full min-h-screen lg:grid lg:grid-cols-2">
+      <div className="flex items-center justify-center py-12">
+        <motion.div
+          className="mx-auto grid w-[380px] gap-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="grid gap-2 text-center">
             <Link
               to="/"
-              className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700"
+              className="flex items-center justify-center space-x-2 mb-4"
             >
-              ← Back to Home
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <FolderKanban className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">WiseCamp</span>
             </Link>
+            <h1 className="text-3xl font-bold">Login</h1>
+            <p className="text-balance text-gray-500">
+              Enter your email below to login to your account
+            </p>
           </div>
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="flex">
-                <AlertCircle className="h-5 w-5 text-red-400" />
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
-                    Login Error
-                  </h3>
-                  <p className="mt-1 text-sm text-red-700">{error}</p>
+
+          <div className="grid gap-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <div className="flex">
+                  <AlertCircle className="h-5 w-5 text-red-400" />
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700">{error}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email address
-              </label>
-              <div className="mt-1">
+            )}
+            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+              <div className="grid gap-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
                 <input
                   {...register("email")}
                   type="email"
                   autoComplete="email"
-                  className={`appearance-none block w-full px-3 py-2 border ${
+                  className={`w-full px-3 py-2 border ${
                     errors.email ? "border-red-300" : "border-gray-300"
-                  } rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm`}
-                  placeholder="Enter your email"
+                  } rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm`}
+                  placeholder="m@example.com"
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">
@@ -125,75 +102,47 @@ const LoginPage: React.FC = () => {
                   </p>
                 )}
               </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  {...register("password")}
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  className={`appearance-none block w-full px-3 py-2 pr-10 border ${
-                    errors.password ? "border-red-300" : "border-gray-300"
-                  } rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm`}
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Password
+                  </label>
+                </div>
+                <div className="relative">
+                  <input
+                    {...register("password")}
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    className={`w-full px-3 py-2 pr-10 border ${
+                      errors.password ? "border-red-300" : "border-gray-300"
+                    } rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm`}
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <Eye className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a
-                  href="#"
-                  className="font-medium text-primary-600 hover:text-primary-500"
-                >
-                  Forgot your password?
-                </a>
-              </div>
-            </div>
-
-            <div>
               <button
                 type="submit"
                 disabled={isSubmitting || state.isLoading}
-                className="group relative w-full flex justify-center py-2 px-4  border border-black text-sm font-medium rounded-md text-black bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full justify-center rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 disabled:opacity-50"
               >
                 {isSubmitting || state.isLoading ? (
                   <div className="flex items-center">
@@ -204,32 +153,25 @@ const LoginPage: React.FC = () => {
                   "Sign in"
                 )}
               </button>
-            </div>
-          </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  New to WiseCamp?
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <Link
-                to="/register"
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
-              >
-                Create new account
-              </Link>
-            </div>
+            </form>
           </div>
+          <div className=" text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link to="/register" className="underline">
+              Sign up
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+      <div className="hidden bg-gray-100 lg:flex items-center justify-center p-12 bg-gradient-to-br from-blue-500 to-purple-600">
+        <div className="text-white text-center max-w-md">
+          <h2 className="text-4xl font-bold">Streamline Your Workflow.</h2>
+          <p className="mt-4 text-lg text-blue-100">
+            Join thousands of teams who use WiseCamp to organize, plan, and
+            execute their projects.
+          </p>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
