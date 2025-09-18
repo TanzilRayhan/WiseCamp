@@ -7,8 +7,6 @@ import { apiService } from "../services/api";
 import type { Board, Column, Card } from "../types";
 import Modal from "../components/ui/Modal";
 
-const COLUMN_TEMPLATE = ["Todo", "In Progress", "Review", "Completed"];
-
 const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -82,19 +80,7 @@ const BoardDetailPage: React.FC = () => {
           </button>
         </div>
         <div className="flex gap-4 overflow-x-auto">
-          {(board.columns && board.columns.length
-            ? board.columns
-            : COLUMN_TEMPLATE.map(
-                (n, i) =>
-                  ({
-                    id: -(i + 1),
-                    name: n,
-                    position: i,
-                    boardId: board.id,
-                    cards: [],
-                  } as unknown as Column)
-              )
-          ).map((col) => (
+          {board.columns.map((col) => (
             <div key={col.id} className="w-80 flex-shrink-0">
               <ColumnColumn
                 col={col}
@@ -117,7 +103,7 @@ const BoardDetailPage: React.FC = () => {
 
           <div className="w-80 flex-shrink-0">
             <div className="p-4 bg-white rounded border">
-              <div className="text-sm font-medium mb-2">Add Column</div>
+              <div className="text-sm font-medium mb-2">Add Milestone</div>
               <input
                 value={newColumnName}
                 onChange={(e) => setNewColumnName(e.target.value)}
@@ -203,7 +189,7 @@ const ColumnColumn: React.FC<{
         <h3 className="font-semibold">{col.name}</h3>
         <div className="flex items-center gap-2">
           <button onClick={addCard} className="text-xs text-blue-600">
-            + Card
+            + Task
           </button>
           {onDelete && (
             <button onClick={onDelete} className="text-xs text-red-500">
