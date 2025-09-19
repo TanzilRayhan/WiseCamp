@@ -45,13 +45,22 @@ public class BoardService {
 
         public List<BoardSummaryResponse> getBoardsForCurrentUser() {
                 User currentUser = getCurrentUser();
-                List<Board> boards = boardRepository.findByMembers_Id(currentUser.getId());
-                return boards.stream()
+                // Get boards user is a member of
+                List<Board> memberBoards = boardRepository.findByMembers_Id(currentUser.getId());
+                // Get all public boards
+                List<Board> publicBoards = boardRepository.findAll().stream().filter(Board::isPublic).toList();
+
+                // Combine and remove duplicates
+                java.util.Set<Board> visibleBoards = new java.util.HashSet<>(memberBoards);
+                visibleBoards.addAll(publicBoards);
+
+                return visibleBoards.stream()
                                 .map(board -> new BoardSummaryResponse(
                                                 board.getId(),
                                                 board.getName(),
                                                 board.getDescription(),
                                                 board.getIsPublic(),
+                                                board.getOwner().getId(),
                                                 board.getMembers().size(),
                                                 board.getColumns() != null ? board.getColumns().stream()
                                                                 .mapToInt(c -> c.getCards() != null

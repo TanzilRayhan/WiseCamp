@@ -3,6 +3,16 @@ import { motion } from "framer-motion";
 import { useDrag, useDrop } from "react-dnd";
 import { useNavigate } from "react-router-dom";
 import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import {
   Plus,
   Users,
   Calendar,
@@ -39,7 +49,7 @@ const DashboardPage: React.FC = () => {
     name: "",
     description: "",
     isPublic: false,
-    projectId: undefined as unknown as number | undefined,
+    projectId: undefined,
   });
 
   useEffect(() => {
@@ -85,6 +95,11 @@ const DashboardPage: React.FC = () => {
     totalMembers: boards.reduce((acc, b) => acc + (b.memberCount || 0), 0),
     totalTasks: boards.reduce((acc, b) => acc + (b.cardCount || 0), 0),
   };
+
+  const chartData = projects.slice(0, 7).map((p) => ({
+    name: p.name,
+    Boards: p.boardCount,
+  }));
 
   if (loading) {
     return (
@@ -232,7 +247,7 @@ const DashboardPage: React.FC = () => {
                     name: "",
                     description: "",
                     isPublic: false,
-                    projectId: undefined as unknown as number | undefined,
+                    projectId: undefined,
                   });
                   addToast("Board created successfully!", "success");
                 } catch (e: unknown) {
@@ -348,6 +363,43 @@ const DashboardPage: React.FC = () => {
           color="orange"
         />
       </div>
+
+      {/* Project Overview Chart */}
+      {projects.length > 0 && (
+        <motion.div
+          className="bg-white rounded-xl border border-gray-200 p-6"
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+        >
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Project Overview
+          </h2>
+          <div style={{ width: "100%", height: 300 }}>
+            <ResponsiveContainer>
+              <BarChart
+                data={chartData}
+                margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis allowDecimals={false} />
+                <Tooltip
+                  cursor={{ fill: "#f3f4f6" }}
+                  contentStyle={{
+                    backgroundColor: "white",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "0.5rem",
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="Boards" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Projects */}

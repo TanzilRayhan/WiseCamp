@@ -21,6 +21,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.62.0",
     "react-router-dom": "^7.9.1",
+    "recharts": "^3.2.1",
     "vite": "^7.1.5",
     "zod": "^4.1.9"
   },
@@ -28,6 +29,7 @@
     "@tailwindcss/postcss": "^4.1.13",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
+    "@types/recharts": "^1.8.29",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react": "^4.2.1",

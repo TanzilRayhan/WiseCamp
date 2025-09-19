@@ -15,4 +15,7 @@ public class AuthDtos {
 
     public record UpdateUserRequest(String name, String username, String email) {
     }
+
+    public record ChangePasswordRequest(String currentPassword, String newPassword) {
+    }
 }

@@ -109,12 +109,7 @@ const LoginPage: React.FC = () => {
                   >
                     Password
                   </label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline"
-                  >
-                    Forgot your password?
-                  </a>
+                 
                 </div>
                 <div className="relative">
                   <input

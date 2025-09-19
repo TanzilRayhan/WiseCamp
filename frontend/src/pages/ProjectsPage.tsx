@@ -15,6 +15,7 @@ import {
 import type { ProjectResponse, CreateProjectRequest } from "../types";
 import { apiService } from "../services/api";
 import Modal from "../components/ui/Modal";
+import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/ui/Toast";
 
 // Using real API; no mock data
@@ -29,6 +30,7 @@ export const ProjectsPage: React.FC = () => {
     useState<ProjectResponse | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { addToast } = useToast();
+  const { state: authState } = useAuth();
   const [filter, setFilter] = useState<"all" | "owned" | "member">("all");
 
   useEffect(() => {
@@ -101,8 +103,12 @@ export const ProjectsPage: React.FC = () => {
       project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    if (filter === "all") return matchesSearch;
-    // Note: We'd need user ID to filter by ownership - for now show all
+    if (filter === "owned") {
+      return matchesSearch && project.ownerId === authState.user?.id;
+    }
+    if (filter === "member") {
+      return matchesSearch && project.ownerId !== authState.user?.id;
+    }
     return matchesSearch;
   });
 
@@ -175,15 +181,7 @@ export const ProjectsPage: React.FC = () => {
               ? "Try adjusting your search terms."
               : "Get started by creating your first project."}
           </p>
-          {!searchTerm && (
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4" />
-              Create Project
-            </button>
-          )}
+          
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

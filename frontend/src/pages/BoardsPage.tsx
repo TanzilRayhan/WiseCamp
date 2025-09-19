@@ -6,6 +6,7 @@ import {
   Trash2,
   Edit3,
   Calendar,
+  Filter,
   MoreHorizontal,
 } from "lucide-react";
 import { useToast } from "../components/ui/Toast";
@@ -17,6 +18,7 @@ import type {
   ProjectResponse,
 } from "../types";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 const BoardsPage: React.FC = () => {
   const [boards, setBoards] = useState<BoardSummaryResponse[]>([]);
@@ -27,13 +29,24 @@ const BoardsPage: React.FC = () => {
   const [openDelete, setOpenDelete] = useState<BoardSummaryResponse | null>(
     null
   );
+  const [filter, setFilter] = useState<"all" | "owned" | "public">("all");
   const { addToast } = useToast();
+  const { state: authState } = useAuth();
 
-  const filtered = useMemo(
-    () =>
-      boards.filter((b) => b.name.toLowerCase().includes(query.toLowerCase())),
-    [boards, query]
-  );
+  const filtered = useMemo(() => {
+    return boards.filter((b) => {
+      const matchesSearch = b.name.toLowerCase().includes(query.toLowerCase());
+      if (!matchesSearch) return false;
+
+      if (filter === "owned") {
+        return b.ownerId === authState.user?.id;
+      }
+      if (filter === "public") {
+        return b.isPublic;
+      }
+      return true;
+    });
+  }, [boards, query, filter, authState.user?.id]);
 
   const loadBoards = async () => {
     setLoading(true);
@@ -99,7 +112,7 @@ const BoardsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className=" p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -127,6 +140,20 @@ const BoardsPage: React.FC = () => {
             onChange={(e) => setQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-gray-400" />
+          <select
+            value={filter}
+            onChange={(e) =>
+              setFilter(e.target.value as "all" | "owned" | "public")
+            }
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">All Boards</option>
+            <option value="owned">Owned by me</option>
+            <option value="public">Public</option>
+          </select>
         </div>
       </div>
 

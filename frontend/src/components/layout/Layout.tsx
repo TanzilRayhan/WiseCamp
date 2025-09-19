@@ -9,6 +9,7 @@ import {
   User,
   Bell,
   Activity,
+  LayoutGrid,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { apiService } from "../../services/api";
@@ -86,7 +87,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigationItems = [
     { path: "/dashboard", icon: Home, label: "Dashboard" },
     { path: "/projects", icon: FolderKanban, label: "Projects" },
-    { path: "/boards", icon: FolderKanban, label: "Boards" },
+    { path: "/boards", icon: LayoutGrid, label: "Boards" },
     { path: "/team", icon: Users, label: "Team" },
   ];
 
@@ -95,10 +96,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg border-r border-gray-200">
+      <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg ">
         <div className="flex flex-col h-full ">
           {/* Logo */}
-          <div className="p-6 border-b border-gray-200">
+          <div className="p-6 ">
             <Link to="/dashboard" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <FolderKanban className="w-5 h-5 text-white" />
@@ -164,9 +165,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm"
+                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white"
                 >
-                  {state.user?.name.charAt(0)}
+                  <User className="w-5 h-5" />
                 </button>
                 {showProfileDropdown && (
                   <ProfileDropdown onLogout={handleLogout} user={state.user} />
@@ -233,9 +234,14 @@ const ProfileDropdown: React.FC<{
   const navigate = useNavigate();
   return (
     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20 overflow-hidden">
-      <div className="p-4 border-b">
-        <p className="font-semibold text-gray-800">{user?.name}</p>
-        <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+      <div className="p-3 border-b flex items-center gap-3">
+        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+          <User className="w-6 h-6" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-gray-800 truncate">{user?.name}</p>
+          <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+        </div>
       </div>
       <div className="py-1">
         <button
