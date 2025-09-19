@@ -134,16 +134,20 @@ export const ProjectDetailPage: React.FC = () => {
       <div className="mb-8">
         <Link
           to="/projects"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to projects
         </Link>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>
-            <p className="text-gray-600 mt-1">{project.description}</p>
-            <p className="text-sm text-gray-500 mt-2">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {project.name}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
+              {project.description}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               Owner: <span className="font-medium">{project.ownerName}</span>
             </p>
           </div>
@@ -339,7 +343,7 @@ const MembersTab: React.FC<{
                   Owner
                 </span>
               ) : (
-                member.role.replace("_", " ").toLowerCase()
+                "Member"
               )}
             </div>
           </li>
@@ -390,14 +394,14 @@ const SettingsTab: React.FC<{
     </div>
 
     {/* Danger Zone */}
-    <div className="bg-white border border-red-300 rounded-xl shadow-sm">
-      <div className="p-6 border-b border-red-200">
+    <div className="bg-white border border-red-300 rounded-xl shadow-sm ">
+      <div className="p-6 border-b border-red-200 ">
         <h3 className="text-lg font-semibold text-red-800">Danger Zone</h3>
         <p className="text-sm text-red-600 mt-1">
           This action is permanent and cannot be undone.
         </p>
       </div>
-      <div className="p-4 bg-red-50 flex justify-between items-center">
+      <div className="p-4 bg-red-50 flex justify-between items-center ">
         <p className="text-sm font-medium text-red-800">Delete this project</p>
         <button
           onClick={onDelete}

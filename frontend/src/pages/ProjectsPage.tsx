@@ -163,7 +163,7 @@ export const ProjectsPage: React.FC = () => {
 
       {/* Projects Grid */}
       {filteredProjects.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12 ">
           <div className="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <User className="h-8 w-8 text-gray-400" />
           </div>

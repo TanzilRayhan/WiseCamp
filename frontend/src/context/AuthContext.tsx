@@ -15,7 +15,8 @@ type AuthAction =
   | { type: "LOGIN_SUCCESS"; payload: { user: UserResponse; token: string } }
   | { type: "LOGIN_FAILURE" }
   | { type: "LOGOUT" }
-  | { type: "SET_LOADING"; payload: boolean };
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "UPDATE_USER"; payload: UserResponse };
 
 interface AuthContextType {
   state: AuthState;
@@ -27,6 +28,7 @@ interface AuthContextType {
     username: string;
   }) => Promise<void>;
   logout: () => void;
+  updateUser: (user: UserResponse) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -64,6 +66,11 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       };
     case "SET_LOADING":
       return { ...state, isLoading: action.payload };
+    case "UPDATE_USER":
+      return {
+        ...state,
+        user: action.payload,
+      };
     default:
       return state;
   }
@@ -164,11 +171,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     dispatch({ type: "LOGOUT" });
   };
 
+  const updateUser = (user: UserResponse): void => {
+    localStorage.setItem("user", JSON.stringify(user));
+    dispatch({ type: "UPDATE_USER", payload: user });
+  };
+
   const value: AuthContextType = {
     state,
     login,
     register,
     logout,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

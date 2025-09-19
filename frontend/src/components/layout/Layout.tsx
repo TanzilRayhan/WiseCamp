@@ -96,7 +96,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg border-r border-gray-200">
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full ">
           {/* Logo */}
           <div className="p-6 border-b border-gray-200">
             <Link to="/dashboard" className="flex items-center space-x-2">
@@ -117,7 +117,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   to={item.path}
                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isCurrentPath(item.path)
-                      ? "bg-primary-100 text-primary-700"
+                      ? "bg-blue-50 text-blue-700"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
@@ -164,7 +164,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                  className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-sm"
+                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm"
                 >
                   {state.user?.name.charAt(0)}
                 </button>

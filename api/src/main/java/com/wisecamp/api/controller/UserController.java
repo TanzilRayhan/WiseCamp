@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wisecamp.api.dto.AuthDtos.UpdateUserRequest;
 import com.wisecamp.api.dto.AuthDtos.UserResponse;
 import com.wisecamp.api.model.User;
 import com.wisecamp.api.repository.UserRepository;
+import com.wisecamp.api.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
@@ -22,9 +24,11 @@ import com.wisecamp.api.repository.UserRepository;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, UserService userService) {
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -34,8 +38,7 @@ public class UserController {
                         user.getId(),
                         user.getName(),
                         user.getEmail(),
-                        user.getUsername(),
-                        user.getAvatarUrl()))
+                        user.getUsername()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(users);
     }
@@ -47,28 +50,13 @@ public class UserController {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getUsername(),
-                user.getAvatarUrl());
+                user.getUsername());
         return ResponseEntity.ok(dto);
-    }
-
-    public record UpdateUserRequest(String name, String username, String email) {
     }
 
     @PutMapping("/me")
     public ResponseEntity<UserResponse> updateMe(@AuthenticationPrincipal UserDetails principal,
             @RequestBody UpdateUserRequest request) {
-        User user = userRepository.findByEmail(principal.getUsername()).orElseThrow();
-        if (request.name() != null)
-            user.setName(request.name());
-        if (request.username() != null)
-            user.setUsername(request.username());
-        if (request.email() != null)
-            user.setEmail(request.email());
-        // role/avatar updates intentionally omitted for safety
-        userRepository.save(user);
-        return ResponseEntity.ok(new UserResponse(
-                user.getId(), user.getName(), user.getEmail(), user.getUsername(),
-                user.getAvatarUrl()));
+        return ResponseEntity.ok(userService.updateUser(principal.getUsername(), request));
     }
 }

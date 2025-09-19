@@ -39,7 +39,6 @@ public class ProjectDtos {
                         String name,
                         String email,
                         String username,
-                        String avatarUrl,
                         LocalDateTime joinedAt) {
         }
 

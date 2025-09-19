@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -29,6 +30,7 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
+    @Transactional
     public void register(RegisterRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new IllegalStateException("Email already in use");
@@ -51,8 +53,7 @@ public class AuthService {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getUsername(),
-                user.getAvatarUrl());
+                user.getUsername());
         return new AuthResponse(token, userResp);
     }
 }

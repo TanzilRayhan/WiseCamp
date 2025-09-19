@@ -7,9 +7,12 @@ public class AuthDtos {
     public record LoginRequest(String email, String password) {
     }
 
-    public record UserResponse(Long id, String name, String email, String username, String avatarUrl) {
+    public record UserResponse(Long id, String name, String email, String username) {
     }
 
     public record AuthResponse(String token, UserResponse user) {
+    }
+
+    public record UpdateUserRequest(String name, String username, String email) {
     }
 }

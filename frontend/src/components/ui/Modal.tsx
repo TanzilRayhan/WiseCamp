@@ -43,7 +43,7 @@ const Modal: React.FC<ModalProps> = ({
       aria-modal="true"
     >
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-[fadeIn_200ms_ease-out]"
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-[fadeIn_200ms_ease-out]"
         onClick={onClose}
       />
       <div

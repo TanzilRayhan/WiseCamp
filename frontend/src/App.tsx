@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -33,6 +34,11 @@ const ProtectedRoute: React.FC = () => {
 };
 
 function App() {
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    localStorage.removeItem("theme");
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

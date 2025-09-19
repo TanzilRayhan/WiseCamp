@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { User as UserIcon, Shield, Palette, Bell } from "lucide-react";
+import { User as UserIcon } from "lucide-react";
 import { apiService } from "../services/api";
-import type { User } from "../types";
+import type { UserResponse } from "../types";
+import { useToast } from "../components/ui/Toast";
+import { useAuth } from "../hooks/useAuth";
 
-type Tab = "profile" | "security" | "appearance" | "notifications";
+type Tab = "profile";
 
 const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
-  const [me, setMe] = useState<User | null>(null);
+  const [me, setMe] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadUser = async () => {
@@ -47,9 +49,6 @@ const SettingsPage: React.FC = () => {
           {activeTab === "profile" && (
             <ProfileSettings user={me} onUpdate={loadUser} />
           )}
-          {activeTab === "security" && <SecuritySettings />}
-          {activeTab === "appearance" && <AppearanceSettings />}
-          {activeTab === "notifications" && <NotificationsSettings />}
         </div>
       </div>
     </div>
@@ -60,12 +59,7 @@ const SettingsSidebar: React.FC<{
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
 }> = ({ activeTab, setActiveTab }) => {
-  const navItems = [
-    { id: "profile", label: "Profile", icon: UserIcon },
-    { id: "security", label: "Security", icon: Shield },
-    { id: "appearance", label: "Appearance", icon: Palette },
-    { id: "notifications", label: "Notifications", icon: Bell },
-  ];
+  const navItems = [{ id: "profile", label: "Profile", icon: UserIcon }];
 
   return (
     <nav className="space-y-1">
@@ -87,10 +81,12 @@ const SettingsSidebar: React.FC<{
   );
 };
 
-const ProfileSettings: React.FC<{ user: User; onUpdate: () => void }> = ({
-  user,
-  onUpdate,
-}) => {
+const ProfileSettings: React.FC<{
+  user: UserResponse;
+  onUpdate: () => void;
+}> = ({ user, onUpdate }) => {
+  const { addToast } = useToast();
+  const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     name: user.name,
@@ -102,11 +98,13 @@ const ProfileSettings: React.FC<{ user: User; onUpdate: () => void }> = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await apiService.updateCurrentUser(form);
+      const updatedUser = await apiService.updateCurrentUser(form);
       setIsEditing(false);
+      addToast("Profile updated successfully!", "success");
+      updateUser(updatedUser);
       onUpdate();
     } catch (error) {
-      console.error("Failed to update profile", error);
+      addToast("Failed to update profile.", "error");
     } finally {
       setIsSaving(false);
     }
@@ -126,20 +124,6 @@ const ProfileSettings: React.FC<{ user: User; onUpdate: () => void }> = ({
         </p>
       </div>
       <div className="p-6">
-        <div className="flex items-center gap-6 mb-8">
-          <div className="w-24 h-24 rounded-full bg-blue-100 text-blue-600 grid place-items-center text-4xl font-semibold">
-            {user.name.charAt(0)}
-          </div>
-          <div>
-            <button className="px-4 py-2 text-sm rounded-lg border bg-white hover:bg-gray-50">
-              Upload new picture
-            </button>
-            <p className="text-xs text-gray-500 mt-2">
-              At least 256x256px, PNG or JPG.
-            </p>
-          </div>
-        </div>
-
         <div className="space-y-6">
           <SettingRow label="Full Name">
             {isEditing ? (
@@ -214,54 +198,6 @@ const SettingRow: React.FC<{ label: string; children: React.ReactNode }> = ({
   <div className="grid grid-cols-3 items-center gap-4">
     <label className="text-sm font-medium text-gray-600">{label}</label>
     <div className="col-span-2">{children}</div>
-  </div>
-);
-
-const SecuritySettings = () => (
-  <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-    <div className="p-6 border-b">
-      <h2 className="text-lg font-semibold text-gray-900">Security</h2>
-      <p className="text-sm text-gray-500 mt-1">
-        Manage your password and account security.
-      </p>
-    </div>
-    <div className="p-6">
-      <p className="text-gray-600">
-        Password settings and two-factor authentication would go here.
-      </p>
-    </div>
-  </div>
-);
-
-const AppearanceSettings = () => (
-  <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-    <div className="p-6 border-b">
-      <h2 className="text-lg font-semibold text-gray-900">Appearance</h2>
-      <p className="text-sm text-gray-500 mt-1">
-        Customize the look and feel of the application.
-      </p>
-    </div>
-    <div className="p-6">
-      <p className="text-gray-600">
-        Theme options (light/dark mode) would go here.
-      </p>
-    </div>
-  </div>
-);
-
-const NotificationsSettings = () => (
-  <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-    <div className="p-6 border-b">
-      <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
-      <p className="text-sm text-gray-500 mt-1">
-        Choose what you want to be notified about.
-      </p>
-    </div>
-    <div className="p-6">
-      <p className="text-gray-600">
-        Notification preferences (email, in-app) would go here.
-      </p>
-    </div>
   </div>
 );
 

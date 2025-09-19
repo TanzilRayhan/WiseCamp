@@ -13,6 +13,7 @@ import type {
   CreateCardRequest,
   Card,
   User,
+  UserResponse,
 } from "../types";
 
 class ApiService {
@@ -233,15 +234,20 @@ class ApiService {
     return response.data;
   }
 
-  async getCurrentUser(): Promise<User> {
-    const response: AxiosResponse<User> = await this.api.get("/users/me");
+  async getCurrentUser(): Promise<UserResponse> {
+    const response: AxiosResponse<UserResponse> = await this.api.get(
+      "/users/me"
+    );
     return response.data;
   }
 
   async updateCurrentUser(
     data: Partial<Pick<User, "name" | "username" | "email">>
-  ): Promise<User> {
-    const response: AxiosResponse<User> = await this.api.put("/users/me", data);
+  ): Promise<UserResponse> {
+    const response: AxiosResponse<UserResponse> = await this.api.put(
+      "/users/me",
+      data
+    );
     return response.data;
   }
 

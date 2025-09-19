@@ -14,6 +14,7 @@ public class User {
     private Long id;
     private String name;
     private String username;
+    @jakarta.persistence.Column(name = "avatar_url")
     private String avatarUrl;
     @jakarta.persistence.Column(unique = true, nullable = false)
     private String email;

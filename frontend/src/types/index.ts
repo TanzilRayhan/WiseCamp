@@ -4,7 +4,6 @@ export interface User {
   name: string;
   email: string;
   username: string;
-  avatarUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,7 +13,6 @@ export interface UserResponse {
   name: string;
   email: string;
   username: string;
-  avatarUrl?: string;
 }
 
 // Auth types
@@ -66,7 +64,6 @@ export interface ProjectMemberResponse {
   name: string;
   email: string;
   username: string;
-  avatarUrl?: string;
   joinedAt: string;
 }
 

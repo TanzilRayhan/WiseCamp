@@ -277,16 +277,14 @@ public class BoardService {
                                                 member.getId(),
                                                 member.getName(),
                                                 member.getEmail(),
-                                                member.getUsername(),
-                                                member.getAvatarUrl()))
+                                                member.getUsername()))
                                 .collect(Collectors.toList());
 
                 UserResponse ownerResponse = new UserResponse(
                                 board.getOwner().getId(),
                                 board.getOwner().getName(),
                                 board.getOwner().getEmail(),
-                                board.getOwner().getUsername(),
-                                board.getOwner().getAvatarUrl());
+                                board.getOwner().getUsername());
 
                 return new FullBoardResponse(
                                 board.getId(),
