@@ -1,14 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import {
-  Plus,
-  Search,
-  Users,
-  Trash2,
-  Edit3,
-  Calendar,
-  Filter,
-  MoreHorizontal,
-} from "lucide-react";
+import { Plus, Search, Users, Trash2, Edit3, Calendar, Filter, MoreHorizontal} from "lucide-react";
 import { useToast } from "../components/ui/Toast";
 import Modal from "../components/ui/Modal";
 import { apiService } from "../services/api";
@@ -194,6 +185,7 @@ const BoardsPage: React.FC = () => {
             name: openEdit.name,
             description: openEdit.description,
             isPublic: openEdit.isPublic,
+            projectId: openEdit.projectId,
           }}
         />
       )}
@@ -341,7 +333,7 @@ const BoardFormModal: React.FC<{
   const [description, setDescription] = useState(initial?.description ?? "");
   const [isPublic, setIsPublic] = useState(initial?.isPublic ?? false);
   const [projectId, setProjectId] = useState<number | undefined>(
-    (initial?.projectId as number | undefined) ?? undefined
+    initial?.projectId
   );
   const [projects, setProjects] = useState<ProjectResponse[]>([]);
 
@@ -349,7 +341,7 @@ const BoardFormModal: React.FC<{
     setName(initial?.name ?? "");
     setDescription(initial?.description ?? "");
     setIsPublic(initial?.isPublic ?? false);
-    setProjectId((initial?.projectId as number | undefined) ?? undefined);
+    setProjectId(initial?.projectId);
   }, [initial, open]);
 
   useEffect(() => {

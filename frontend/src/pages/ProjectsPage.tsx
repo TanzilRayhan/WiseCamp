@@ -1,24 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Plus,
-  Search,
-  Filter,
-  MoreHorizontal,
-  Users,
-  Calendar,
-  Trash2,
-  Edit3,
-  Settings,
-  User,
-} from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, Users, Calendar, Trash2, Edit3, Settings, User} from "lucide-react";
 import type { ProjectResponse, CreateProjectRequest } from "../types";
 import { apiService } from "../services/api";
 import Modal from "../components/ui/Modal";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/ui/Toast";
-
-// Using real API; no mock data
 
 export const ProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<ProjectResponse[]>([]);

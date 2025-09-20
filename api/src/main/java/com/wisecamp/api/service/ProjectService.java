@@ -1,23 +1,29 @@
 package com.wisecamp.api.service;
 
-import com.wisecamp.api.dto.ProjectDtos.*;
-import com.wisecamp.api.model.Project;
-import com.wisecamp.api.model.Board;
-import com.wisecamp.api.model.User;
-import com.wisecamp.api.repository.ProjectRepository;
-import com.wisecamp.api.repository.BoardRepository;
-import com.wisecamp.api.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.wisecamp.api.dto.ProjectDtos.AddMemberRequest;
+import com.wisecamp.api.dto.ProjectDtos.CreateProjectRequest;
+import com.wisecamp.api.dto.ProjectDtos.ProjectBoardResponse;
+import com.wisecamp.api.dto.ProjectDtos.ProjectDetailResponse;
+import com.wisecamp.api.dto.ProjectDtos.ProjectMemberResponse;
+import com.wisecamp.api.dto.ProjectDtos.ProjectResponse;
+import com.wisecamp.api.dto.ProjectDtos.UpdateProjectRequest;
+import com.wisecamp.api.model.Board;
+import com.wisecamp.api.model.Project;
+import com.wisecamp.api.model.User;
+import com.wisecamp.api.repository.BoardRepository;
+import com.wisecamp.api.repository.ProjectRepository;
+import com.wisecamp.api.repository.UserRepository;
 
 @Service
 public class ProjectService {
@@ -44,7 +50,7 @@ public class ProjectService {
                 project.setName(request.name());
                 project.setDescription(request.description());
                 project.setOwner(currentUser);
-                project.setMembers(Set.of(currentUser)); // Owner is also a member
+                project.setMembers(Set.of(currentUser)); 
                 project.setCreatedAt(LocalDateTime.now());
                 project.setUpdatedAt(LocalDateTime.now());
 
@@ -80,7 +86,6 @@ public class ProjectService {
                 Project project = projectRepository.findById(projectId)
                                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-                // Check if user has access to this project
                 if (project.getMembers().stream().noneMatch(member -> member.getId().equals(currentUser.getId()))) {
                         throw new AccessDeniedException("Access denied to this project");
                 }
@@ -91,7 +96,7 @@ public class ProjectService {
                                                 member.getName(),
                                                 member.getEmail(),
                                                 member.getUsername(),
-                                                member.getCreatedAt() // Using createdAt as joinedAt for now
+                                                member.getCreatedAt() 
                                 ))
                                 .collect(Collectors.toList());
 
@@ -123,7 +128,6 @@ public class ProjectService {
                 Project project = projectRepository.findById(projectId)
                                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-                // Check if user is the owner
                 if (!project.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only project owner can update the project");
                 }
@@ -149,7 +153,6 @@ public class ProjectService {
                 Project project = projectRepository.findById(projectId)
                                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-                // Check if user is the owner
                 if (!project.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only project owner can delete the project");
                 }
@@ -163,7 +166,7 @@ public class ProjectService {
                 Project project = projectRepository.findById(projectId)
                                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-                // Check if user is the owner
+
                 if (!project.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only project owner can add members");
                 }
@@ -173,12 +176,11 @@ public class ProjectService {
                                                 "User not found with email: " + request.email()));
                 if (project.getMembers().stream().noneMatch(member -> member.getId().equals(newMember.getId()))) {
                         project.getMembers().add(newMember);
-                        // Also add the new member to all boards within this project
+                       
                         List<Board> boards = boardRepository.findByProjectId(projectId);
                         for (Board board : boards) {
                                 board.getMembers().add(newMember);
-                                // No need to call save on each board, @Transactional will handle it
-                                // if the relationship is correctly configured. But being explicit is safer.
+                                
                                 boardRepository.save(board);
                         }
                         projectRepository.save(project);
@@ -191,12 +193,10 @@ public class ProjectService {
                 Project project = projectRepository.findById(projectId)
                                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-                // Check if user is the owner
                 if (!project.getOwner().getId().equals(currentUser.getId())) {
                         throw new AccessDeniedException("Only project owner can remove members");
                 }
 
-                // Prevent removing the owner
                 if (project.getOwner().getId().equals(userId)) {
                         throw new RuntimeException("Cannot remove project owner");
                 }
@@ -205,7 +205,6 @@ public class ProjectService {
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
                 if (project.getMembers().remove(memberToRemove)) {
-                        // Also remove the member from all boards within this project
                         List<Board> boards = boardRepository.findByProjectId(projectId);
                         for (Board board : boards) {
                                 board.getMembers().remove(memberToRemove);

@@ -2,31 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useDrag, useDrop } from "react-dnd";
 import { useNavigate } from "react-router-dom";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import {
-  Plus,
-  Users,
-  Calendar,
-  TrendingUp,
-  Activity,
-  Folder,
-  MoreHorizontal,
-} from "lucide-react";
-import type {
-  ProjectResponse,
-  BoardSummaryResponse,
-  CreateProjectRequest,
-  CreateBoardRequest,
-} from "../types";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts";
+import { Plus, Users, Calendar, Activity, Folder, MoreHorizontal} from "lucide-react";
+import type { ProjectResponse, BoardSummaryResponse, CreateProjectRequest, CreateBoardRequest} from "../types";
 import { apiService } from "../services/api";
 import Modal from "../components/ui/Modal";
 import { useToast } from "../components/ui/Toast";

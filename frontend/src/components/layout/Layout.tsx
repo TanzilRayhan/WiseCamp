@@ -15,7 +15,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { apiService } from "../../services/api";
 import type { BoardSummaryResponse, UserResponse } from "../../types";
 
-// Custom hook to handle clicks outside a component
+// Custom hook
 function useClickOutside(
   ref: React.RefObject<HTMLElement>,
   handler: () => void
@@ -137,7 +137,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="px-6 py-4 flex items-center justify-between">
             <h1 className="text-2xl font-semibold text-gray-900">
-              {/* Dynamic title based on current route */}
               {location.pathname === "/dashboard" && "Dashboard"}
               {location.pathname === "/projects" && "Projects"}
               {location.pathname === "/boards" && "Boards"}

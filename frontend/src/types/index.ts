@@ -100,6 +100,7 @@ export interface BoardSummaryResponse {
   name: string;
   description: string;
   isPublic: boolean;
+  projectId?: number;
   ownerId: number;
   memberCount: number;
   cardCount: number;

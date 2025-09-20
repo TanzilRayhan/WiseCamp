@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useDrop, useDrag, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { apiService } from "../services/api";
@@ -73,7 +73,7 @@ const BoardDetailPage: React.FC = () => {
   };
 
   const moveCard = (cardId: number, toColumnId: number, toPosition: number) => {
-    // Optimistic update
+
     setBoard((prevBoard) => {
       if (!prevBoard) return null;
 
@@ -91,23 +91,21 @@ const BoardDetailPage: React.FC = () => {
         }
       }
 
-      if (!cardToMove) return prevBoard; // Card not found
+      if (!cardToMove) return prevBoard; 
 
-      // Find the destination column and add the card
       const toColumn = newBoard.columns.find(
         (c: Column) => c.id === toColumnId
       );
-      if (!toColumn) return prevBoard; // Destination column not found
+      if (!toColumn) return prevBoard; 
 
       toColumn.cards.splice(toPosition, 0, cardToMove);
 
       return newBoard;
     });
 
-    // API call in the background
     apiService.moveCard(cardId, toColumnId, toPosition).catch((e) => {
       console.error("Failed to move card, reverting.", e);
-      load(); // Revert on error
+      load(); 
     });
   };
 

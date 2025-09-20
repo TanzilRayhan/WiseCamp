@@ -2,19 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import {
-  ArrowRight,
-  Sparkles,
-  Shield,
-  Users,
-  Layers,
-  ChevronDown,
-  ClipboardList,
-  UserPlus,
-  BarChart,
-  Star,
-  FolderKanban,
-} from "lucide-react";
+import { ArrowRight, Sparkles, Shield, Users, Layers, ChevronDown, ClipboardList, UserPlus, BarChart, FolderKanban} from "lucide-react";
 
 const LandingPage: React.FC = () => {
   const { state } = useAuth();

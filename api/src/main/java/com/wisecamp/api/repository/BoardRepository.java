@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
-    // Finds all boards where the user is a member
+
     List<Board> findByMembers_Id(Long userId);
 
     List<Board> findByMembersContaining(User user);

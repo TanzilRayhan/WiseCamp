@@ -1,20 +1,6 @@
 import axios from "axios";
 import type { AxiosInstance, AxiosResponse } from "axios";
-import type {
-  LoginRequest,
-  RegisterRequest,
-  AuthResponse,
-  CreateProjectRequest,
-  ProjectResponse,
-  ProjectDetailResponse,
-  CreateBoardRequest,
-  Board,
-  BoardSummaryResponse,
-  CreateCardRequest,
-  Card,
-  User,
-  UserResponse,
-} from "../types";
+import type { LoginRequest, RegisterRequest, AuthResponse, CreateProjectRequest, ProjectResponse, ProjectDetailResponse, CreateBoardRequest, Board, BoardSummaryResponse, CreateCardRequest, Card, User, UserResponse} from "../types";
 
 class ApiService {
   private api: AxiosInstance;
@@ -27,7 +13,6 @@ class ApiService {
       },
     });
 
-    // Add request interceptor to include JWT token
     this.api.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem("auth_token");
@@ -41,12 +26,10 @@ class ApiService {
       }
     );
 
-    // Add response interceptor for error handling
     this.api.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          // Clear token and redirect to login
           localStorage.removeItem("auth_token");
           localStorage.removeItem("user");
           window.location.href = "/login";

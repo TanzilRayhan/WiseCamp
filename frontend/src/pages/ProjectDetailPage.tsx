@@ -1,23 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import {
-  Users,
-  Calendar,
-  Settings,
-  Trash2,
-  Plus,
-  UserPlus,
-  ArrowLeft,
-  Edit3,
-} from "lucide-react";
+import {Users, Calendar, Settings, Plus, UserPlus, ArrowLeft} from "lucide-react";
 import { apiService } from "../services/api";
-import type {
-  ProjectDetailResponse,
-  CreateProjectRequest,
-  CreateBoardRequest,
-  ProjectMemberResponse,
-  ProjectBoardResponse,
-} from "../types";
+import type {ProjectDetailResponse, CreateProjectRequest, CreateBoardRequest} from "../types";
 import Modal from "../components/ui/Modal";
 import { useToast } from "../components/ui/Toast";
 
@@ -99,7 +84,7 @@ export const ProjectDetailPage: React.FC = () => {
 
   const handleCreateBoard = async (data: CreateBoardRequest) => {
     if (!project) return;
-    await apiService.createBoard({ ...data, projectId: project.id });
+    await apiService.createBoard(data);
     await loadProject(); // Reload to get updated board list
     setShowCreateBoardModal(false);
     addToast("Board created successfully!", "success");
@@ -141,12 +126,8 @@ export const ProjectDetailPage: React.FC = () => {
         </Link>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {project.name}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
-              {project.description}
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>
+            <p className="text-gray-600  mt-1">{project.description}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               Owner: <span className="font-medium">{project.ownerName}</span>
             </p>
@@ -227,6 +208,7 @@ export const ProjectDetailPage: React.FC = () => {
         onClose={() => setShowCreateBoardModal(false)}
         onSubmit={handleCreateBoard}
         title="Create New Board"
+        initialData={{ projectId: project.id, projectName: project.name }}
       />
     </div>
   );
@@ -627,6 +609,7 @@ interface BoardFormModalProps {
   onClose: () => void;
   onSubmit: (data: CreateBoardRequest) => void;
   title: string;
+  initialData?: Partial<CreateBoardRequest> & { projectName?: string };
 }
 
 const BoardFormModal: React.FC<BoardFormModalProps> = ({
@@ -634,18 +617,23 @@ const BoardFormModal: React.FC<BoardFormModalProps> = ({
   onClose,
   onSubmit,
   title,
+  initialData,
 }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [description, setDescription] = useState(
+    initialData?.description ?? ""
+  );
+  const [isPublic, setIsPublic] = useState(initialData?.isPublic ?? false);
+  const [projectId, setProjectId] = useState(initialData?.projectId);
 
   useEffect(() => {
     if (open) {
-      setName("");
-      setDescription("");
-      setIsPublic(false);
+      setName(initialData?.name ?? "");
+      setDescription(initialData?.description ?? "");
+      setIsPublic(initialData?.isPublic ?? false);
+      setProjectId(initialData?.projectId);
     }
-  }, [open]);
+  }, [open, initialData]);
 
   return (
     <Modal
@@ -659,7 +647,7 @@ const BoardFormModal: React.FC<BoardFormModalProps> = ({
             Cancel
           </button>
           <button
-            onClick={() => onSubmit({ name, description, isPublic })}
+            onClick={() => onSubmit({ name, description, isPublic, projectId })}
             className="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50"
             disabled={!name.trim()}
           >
@@ -690,6 +678,19 @@ const BoardFormModal: React.FC<BoardFormModalProps> = ({
             className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
+        {initialData?.projectName && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Project
+            </label>
+            <input
+              type="text"
+              value={initialData.projectName}
+              disabled
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 bg-gray-100"
+            />
+          </div>
+        )}
         <label className="inline-flex items-center gap-2 text-sm text-gray-700">
           <input
             type="checkbox"

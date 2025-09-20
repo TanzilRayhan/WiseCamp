@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { Search, UserPlus, Trash2, Shield, MoreHorizontal } from "lucide-react";
+import { Search, UserPlus, Trash2, MoreHorizontal } from "lucide-react";
 import { apiService } from "../services/api";
 import type { ProjectResponse, ProjectMemberResponse } from "../types";
 import Modal from "../components/ui/Modal";
@@ -82,7 +82,7 @@ const TeamPage: React.FC = () => {
         deletingMember.id
       );
       setDeletingMember(null);
-      await loadMembers(); // Reload members
+      await loadMembers();
     } catch (error) {
       console.error("Failed to remove member", error);
     }

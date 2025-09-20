@@ -12,6 +12,7 @@ public class BoardDtos {
                         String name,
                         String description,
                         Boolean isPublic,
+                        Long projectId,
                         Long ownerId,
                         Integer memberCount,
                         Integer cardCount,
